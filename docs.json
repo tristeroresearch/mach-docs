@@ -126,8 +126,8 @@
     }
   },
   "logo": {
-    "light": "/logo/mach.svg",
-    "dark": "/logo/mach.svg"
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
   },
   "navbar": {
     "links": [
