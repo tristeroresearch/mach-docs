@@ -8,6 +8,15 @@
     "dark": "#171717"
   },
   "favicon": "/favicon.svg",
+  "api": {
+    "playground": {
+      "proxy": false
+    },
+    "openapi": "/api-reference/openapi.json",
+    "mdx": {
+      "server": "https://mach-prod-536329393577.asia-northeast1.run.app"
+    }
+  },
   "navigation": {
     "tabs": [
       {
