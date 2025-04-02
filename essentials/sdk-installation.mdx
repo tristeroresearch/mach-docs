@@ -1,0 +1,63 @@
+---
+title: 'Installing the Mach SDK'
+description: 'Guide to installing and setting up the Mach SDK in your project'
+---
+
+# Installing the Mach SDK
+
+The Mach SDK provides easy access to the Mach Exchange functionality, allowing you to integrate cross-chain swaps, order management, and more into your application.
+
+## Installation
+
+### Using npm
+
+```bash
+npm install @mach-exchange/sdk
+```
+
+### Using yarn
+
+```bash
+yarn add @mach-exchange/sdk
+```
+
+## Basic Setup
+
+After installing the SDK, you'll need to initialize it in your application:
+
+```typescript
+import { MachSDK } from '@mach-exchange/sdk';
+
+// Initialize with default settings
+const machSdk = new MachSDK();
+
+// Or with custom configuration
+const machSdk = new MachSDK({
+  apiUrl: 'https://api.mach.exchange',
+  networkId: 1, // Ethereum Mainnet
+  debug: false
+});
+```
+
+## Requirements
+
+- Node.js 16 or higher
+- TypeScript 4.5+ (recommended, but not required)
+- A browser environment or Node.js backend
+
+## Next Steps
+
+Once you have installed the SDK, you can proceed to:
+
+- [Basic Integration](/essentials/basic-integration) - Learn how to perform your first operations
+- [Wallet Connection](/essentials/wallet-connection) - Connect to user wallets
+- [Order Management](/essentials/order-management) - Manage orders and trades
+
+## Troubleshooting
+
+If you encounter issues during installation:
+
+1. Make sure your Node.js version is compatible
+2. Check for any conflicting dependencies
+3. If using TypeScript, ensure your `tsconfig.json` is properly configured
+4. Consult the [GitHub repository](https://github.com/mach-exchange/mach-sdk) for open issues

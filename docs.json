@@ -23,14 +23,24 @@
               "mach/getting-started/integrating-mach",
               "mach/getting-started/community"
             ]
+          },
+          {
+            "group": "Protocol Concepts",
+            "pages": [
+              "mach/protocol-concepts/challenge-system",
+              "mach/protocol-concepts/cross-chain-swaps",
+              "mach/protocol-concepts/intents",
+              "mach/protocol-concepts/optimistic-settlement",
+              "mach/protocol-concepts/orderbook-and-limit-orders"
+            ]
           }
         ]
       },
       {
-        "tab": "Guides",
+        "tab": "Mach SDK",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Getting Started",
             "pages": [
               "introduction",
               "quickstart",
@@ -38,14 +48,14 @@
             ]
           },
           {
-            "group": "Essentials",
+            "group": "Guides",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              "essentials/sdk-installation",
+              "essentials/basic-integration",
+              "essentials/order-management",
+              "essentials/cross-chain-swaps",
+              "essentials/wallet-connection",
+              "essentials/error-handling"
             ]
           }
         ]

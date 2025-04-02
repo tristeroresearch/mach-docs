@@ -1,0 +1,143 @@
+---
+title: 'Order Management'
+description: 'Learn how to create, track, and manage orders with the Mach SDK'
+---
+
+# Order Management with Mach SDK
+
+The Mach SDK provides comprehensive tools for creating and managing orders on the Mach Exchange. This guide will walk you through the order lifecycle.
+
+## Creating a New Order
+
+To create a new order using the SDK:
+
+```typescript
+import { MachSDK, OrderType } from '@mach-exchange/sdk';
+
+const machSdk = new MachSDK();
+
+// Create a market order
+const marketOrder = await machSdk.createOrder({
+  fromToken: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
+  toToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
+  amount: '1000000000000000000', // 1 DAI (in wei)
+  fromChainId: 1,
+  toChainId: 1,
+  type: OrderType.MARKET,
+  slippage: 0.5 // 0.5% slippage tolerance
+});
+
+console.log('Order created:', marketOrder.id);
+```
+
+## Creating a Limit Order
+
+For limit orders with a specific price:
+
+```typescript
+const limitOrder = await machSdk.createOrder({
+  fromToken: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
+  toToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
+  amount: '1000000000000000000', // 1 DAI (in wei)
+  fromChainId: 1,
+  toChainId: 1,
+  type: OrderType.LIMIT,
+  limitPrice: '0.0005', // Limit price in toToken per fromToken
+  expiry: Math.floor(Date.now() / 1000) + 86400 // Expires in 24 hours
+});
+
+console.log('Limit order created:', limitOrder.id);
+```
+
+## Getting Order Status
+
+Retrieve the status of an existing order:
+
+```typescript
+const orderId = 'order-123456';
+const status = await machSdk.getOrderStatus(orderId);
+
+console.log('Order status:', status.state);
+console.log('Filled amount:', status.filledAmount);
+console.log('Remaining amount:', status.remainingAmount);
+```
+
+## Fetching User Orders
+
+Get all orders for a user:
+
+```typescript
+const userAddress = '0xYourWalletAddress';
+const orders = await machSdk.getUserOrders(userAddress);
+
+console.log('Active orders:', orders.filter(order => order.state === 'ACTIVE'));
+console.log('Completed orders:', orders.filter(order => order.state === 'FILLED'));
+```
+
+## Canceling an Order
+
+To cancel an unfilled or partially filled order:
+
+```typescript
+const orderId = 'order-123456';
+const result = await machSdk.cancelOrder(orderId);
+
+if (result.success) {
+  console.log('Order canceled successfully');
+} else {
+  console.error('Failed to cancel order:', result.error);
+}
+```
+
+## Order Event Subscriptions
+
+Subscribe to order updates:
+
+```typescript
+const orderId = 'order-123456';
+const unsubscribe = machSdk.subscribeToOrderUpdates(orderId, (update) => {
+  console.log('Order update received:', update);
+  
+  if (update.state === 'FILLED') {
+    console.log('Order has been completely filled!');
+    unsubscribe(); // Stop listening once order is filled
+  }
+});
+```
+
+## Advanced Order Features
+
+### Time-in-Force Orders
+
+Create orders with specific time constraints:
+
+```typescript
+const gtcOrder = await machSdk.createOrder({
+  // Basic order parameters
+  // ...
+  timeInForce: 'GTC' // Good Till Canceled
+});
+
+const iocOrder = await machSdk.createOrder({
+  // Basic order parameters
+  // ...
+  timeInForce: 'IOC' // Immediate Or Cancel
+});
+```
+
+### Post-Only Orders
+
+Create orders that are guaranteed to be makers, not takers:
+
+```typescript
+const postOnlyOrder = await machSdk.createOrder({
+  // Basic order parameters
+  // ...
+  postOnly: true
+});
+```
+
+## Next Steps
+
+- [Cross-Chain Swaps](/essentials/cross-chain-swaps) - Learn how to perform swaps across different blockchains
+- [Error Handling](/essentials/error-handling) - Handle errors gracefully in production applications

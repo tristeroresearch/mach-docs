@@ -5,17 +5,153 @@ description: "Guide for integrating Mach into your applications"
 
 # Integrating Mach
 
-Mach provides a seamless integration experience for developers looking to add cross-chain swaps to their applications. This guide will walk you through the process of integrating Mach into your application.
+> More integration examples are coming! Feel free to ping us on Telegram and we will work with you directly to fast track your integration.
 
-## Integration Overview
+## Integrating Mach into Client Apps
 
-Integrating Mach into your application involves three primary steps:
+Fundamentally, there are three steps:
 
-1. **Smart Contract Integration**: Interact with Mach's smart contracts to place trades
-2. **API Integration**: Use Mach's API to fetch quotes, submit orders, and track order status
-3. **UI Integration**: Provide a user interface for your users to interact with Mach
+1. **Load the token contract addresses** that the user wants to transact between & the swap Mach contract on the sell-side network (and make sure that token spend is approved). You can get all of our supported tokens and networks from our API.
 
-## Smart Contract Integration
+2. **Build and issue a transaction** that executes the `placeTrade` function on the Mach contract, which places an order onto the order book.
+
+3. **Build and issue an API call** to a backend server that fills the order (check out ours in our [API docs](https://cache-half-full-production.fly.dev/docs#/default/make_order_make_order_post)).
+
+```typescript
+/** Step 1 **/
+// Check and approve the sell-side token spend on Arbitrum
+async function checkAndApproveAllowance(wallet: ethers.Wallet, tokenAddress: string, spenderAddress: string, amount: BigNumber) {
+  const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, wallet);
+  const allowance = await tokenContract.allowance(wallet.address, spenderAddress);
+  
+  if (allowance.lt(amount)) {
+    const tx = await tokenContract.approve(spenderAddress, ethers.constants.MaxUint256);
+    await tx.wait();
+    return true;
+  }
+  return false;
+}
+
+// Load the Mach swap contract
+function getSwapContract(wallet: ethers.Wallet, contractAddress: string) {
+  return new ethers.Contract(contractAddress, MACH_SWAP_ABI, wallet);
+}
+
+/** Step 2 **/
+// Build smart contract transaction function arguments
+async function getTransactionFunctionArgs(
+  swapContract: ethers.Contract,
+  sourceToken: string,
+  destinationToken: string,
+  destinationChain: string,
+  amount: BigNumber,
+  destinationAddress: string
+) {
+  const transactionFunctionArgs = [
+    sourceToken,            // Source token address
+    destinationToken,       // Destination token address
+    destinationChain,       // Destination chain ID or name
+    amount,                 // Amount to swap (in source token's smallest unit)
+    destinationAddress      // Address to receive tokens on destination chain
+  ];
+
+  return transactionFunctionArgs;
+}
+
+// Execute the token exchange by issuing smart contract transaction
+async function placeTrade(
+  swapContract: ethers.Contract,
+  transactionFunctionArgs: any[]
+) {
+  const tx = await swapContract.placeTrade(...transactionFunctionArgs);
+  return await tx.wait();
+}
+
+/** Step 3 **/
+// Fetch the event log for the OrderPlaced events
+async function getOrderFromReceipt(receipt: TransactionReceipt, swapContract: ethers.Contract) {
+  const orderPlacedEvent = receipt.logs
+    .map(log => {
+      try {
+        return swapContract.interface.parseLog(log);
+      } catch (e) {
+        return null;
+      }
+    })
+    .filter(event => event !== null && event.name === 'OrderPlaced')[0];
+  
+  if (!orderPlacedEvent) {
+    throw new Error('OrderPlaced event not found in transaction receipt');
+  }
+  
+  return orderPlacedEvent.args;
+}
+
+// Make the API call
+async function apiSendOrderData(orderData: {
+  sellChain: string;
+  transactionHash: string;
+}, referralCode?: string, referrer?: string) {
+  // Remove spaces from sellChain
+  const sellChain = orderData.sellChain.replace(/\s+/g, '');
+  
+  const payload = {
+    chain: sellChain,
+    place_taker_tx: orderData.transactionHash,
+    referral_code: referralCode,
+    referrer,
+  };
+
+  try {
+    // Determine which API to use based on chain type
+    const api = !isTestnet(CHAIN_IDS[payload.chain as ChainName])
+      ? cacheHalfFullApi
+      : cacheHalfFullTestnetApi;
+
+    const response = await api.post('/v1/orders', payload);
+    
+    // Handle response based on status code
+    switch (Number(response.status)) {
+      case 200:
+        return {
+          message: 'Order successfully sent.',
+          status: 'pending',
+          eta: response.data.eta,
+          id: response.data.id,
+        };
+      case 202:
+        return {
+          message: 'Order accepted but will take 5-20 minutes to find a match.',
+          status: 'pending',
+          eta: response.data.eta,
+        };
+      case 400:
+        return {
+          message: 'Order will not be filled by the market maker at this time.',
+          status: 'failure',
+          errorobj: response.data,
+        };
+      // Handle other status codes...
+      default:
+        return {
+          message: 'Unexpected error occurred.',
+          status: 'failure',
+          errorobj: response.data,
+        };
+    }
+  } catch (error) {
+    // Handle errors appropriately
+    return {
+      message: getErrorMessage(error),
+      status: 'failure',
+      errorobj: error,
+    };
+  }
+}
+
+## Detailed Implementation Guide
+
+This section provides more detailed implementation examples for each step of the integration process.
 
 ### Step 1: Load Contracts and Approve Token Spend
 

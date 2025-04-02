@@ -1,0 +1,200 @@
+---
+title: 'Wallet Connection'
+description: 'Learn how to integrate wallet connections with the Mach SDK'
+---
+
+# Wallet Connection with Mach SDK
+
+Connecting to user wallets is a fundamental requirement for any DApp using the Mach Exchange. This guide explains how to implement wallet connections using the Mach SDK.
+
+## Supported Wallet Types
+
+The Mach SDK supports a variety of wallet providers:
+
+- MetaMask
+- WalletConnect
+- Coinbase Wallet
+- Trust Wallet
+- And more...
+
+## Basic Wallet Connection
+
+Here's how to implement a basic wallet connection:
+
+```typescript
+import { MachSDK, WalletProvider } from '@mach-exchange/sdk';
+
+const machSdk = new MachSDK();
+
+// Connect to MetaMask
+async function connectMetaMask() {
+  try {
+    const connection = await machSdk.connectWallet({
+      provider: WalletProvider.METAMASK
+    });
+    
+    console.log('Connected to wallet:', connection.address);
+    console.log('Chain ID:', connection.chainId);
+    
+    return connection;
+  } catch (error) {
+    console.error('Failed to connect to MetaMask:', error);
+    throw error;
+  }
+}
+
+// Connect using WalletConnect
+async function connectWalletConnect() {
+  try {
+    const connection = await machSdk.connectWallet({
+      provider: WalletProvider.WALLET_CONNECT,
+      walletConnectOptions: {
+        projectId: 'YOUR_PROJECT_ID',
+        name: 'Your App Name',
+        description: 'Your App Description'
+      }
+    });
+    
+    console.log('Connected via WalletConnect:', connection.address);
+    return connection;
+  } catch (error) {
+    console.error('Failed to connect via WalletConnect:', error);
+    throw error;
+  }
+}
+```
+
+## Checking Connection State
+
+Monitor and respond to wallet connection states:
+
+```typescript
+// Check if a wallet is already connected
+const isConnected = machSdk.isWalletConnected();
+console.log('Wallet connected:', isConnected);
+
+if (isConnected) {
+  const walletInfo = machSdk.getConnectedWallet();
+  console.log('Connected address:', walletInfo.address);
+  console.log('Connected chain:', walletInfo.chainId);
+}
+
+// Subscribe to connection state changes
+const unsubscribe = machSdk.subscribeToWalletEvents((event) => {
+  if (event.type === 'connect') {
+    console.log('Wallet connected:', event.address);
+  } else if (event.type === 'disconnect') {
+    console.log('Wallet disconnected');
+  } else if (event.type === 'chainChanged') {
+    console.log('Chain changed to:', event.chainId);
+  } else if (event.type === 'accountsChanged') {
+    console.log('Account changed to:', event.address);
+  }
+});
+
+// Later, when you no longer need the subscription
+unsubscribe();
+```
+
+## Switching Networks
+
+Help users switch between networks:
+
+```typescript
+// Switch to Polygon network
+async function switchToPolygon() {
+  try {
+    await machSdk.switchNetwork(137); // Polygon chain ID
+    console.log('Successfully switched to Polygon');
+  } catch (error) {
+    console.error('Failed to switch network:', error);
+    
+    // If the network isn't configured in the wallet, add it
+    if (error.code === 4902) { // Chain not added
+      try {
+        await machSdk.addNetwork({
+          chainId: 137,
+          chainName: 'Polygon Mainnet',
+          nativeCurrency: {
+            name: 'MATIC',
+            symbol: 'MATIC',
+            decimals: 18
+          },
+          rpcUrls: ['https://polygon-rpc.com'],
+          blockExplorerUrls: ['https://polygonscan.com']
+        });
+        console.log('Added Polygon network to wallet');
+        
+        // Try switching again
+        await machSdk.switchNetwork(137);
+      } catch (addError) {
+        console.error('Failed to add network:', addError);
+      }
+    }
+  }
+}
+```
+
+## Signing Messages
+
+For operations that require message signing:
+
+```typescript
+// Sign a message
+async function signMessage(message) {
+  try {
+    const signature = await machSdk.signMessage(message);
+    console.log('Message signed:', signature);
+    return signature;
+  } catch (error) {
+    console.error('Failed to sign message:', error);
+    throw error;
+  }
+}
+
+// Sign typed data (EIP-712)
+async function signTypedData(typedData) {
+  try {
+    const signature = await machSdk.signTypedData(typedData);
+    console.log('Typed data signed:', signature);
+    return signature;
+  } catch (error) {
+    console.error('Failed to sign typed data:', error);
+    throw error;
+  }
+}
+```
+
+## Disconnecting Wallets
+
+Properly handle wallet disconnections:
+
+```typescript
+// Disconnect the currently connected wallet
+function disconnectWallet() {
+  machSdk.disconnectWallet();
+  console.log('Wallet disconnected');
+}
+```
+
+## Multi-Wallet Support
+
+Support for connecting to multiple wallets:
+
+```typescript
+// For advanced use cases where multiple wallets need to be managed
+const wallets = await machSdk.getAvailableWallets();
+console.log('Available wallet providers:', wallets);
+
+// Connect to a secondary wallet
+const secondaryWallet = await machSdk.connectSecondaryWallet({
+  provider: WalletProvider.WALLET_CONNECT
+});
+
+console.log('Secondary wallet connected:', secondaryWallet.address);
+```
+
+## Next Steps
+
+- [Error Handling](/essentials/error-handling) - Implement robust error handling
+- [Order Management](/essentials/order-management) - Learn how to manage orders with the connected wallet

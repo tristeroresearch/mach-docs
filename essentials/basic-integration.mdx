@@ -1,0 +1,97 @@
+---
+title: 'Basic Integration'
+description: 'Learn how to perform basic operations with the Mach SDK'
+---
+
+# Basic Integration with Mach SDK
+
+After [installing the SDK](/essentials/sdk-installation), you can start integrating Mach Exchange functionality into your application. This guide covers the fundamental operations.
+
+## Initializing the SDK
+
+First, import and initialize the SDK in your application:
+
+```typescript
+import { MachSDK } from '@mach-exchange/sdk';
+
+// Initialize the SDK
+const machSdk = new MachSDK({
+  apiUrl: 'https://api.mach.exchange',
+  networkId: 1 // Ethereum Mainnet
+});
+```
+
+## Checking Available Tokens
+
+To get a list of all available tokens on Mach Exchange:
+
+```typescript
+const tokens = await machSdk.getTokens();
+console.log('Available tokens:', tokens);
+```
+
+## Getting Exchange Information
+
+Retrieve information about the exchange, such as supported chains, gas prices, and more:
+
+```typescript
+const config = await machSdk.getConfig();
+console.log('Supported chains:', config.supportedChains);
+console.log('Gas prices:', config.gasPrices);
+```
+
+## Fetching Token Balances
+
+If a wallet is connected, you can fetch token balances:
+
+```typescript
+// Assuming a wallet is already connected
+const address = '0xYourWalletAddress';
+const balances = await machSdk.getTokenBalances(address);
+console.log('Your balances:', balances);
+```
+
+## Simple Price Check
+
+Check the price for swapping tokens:
+
+```typescript
+const quote = await machSdk.getQuote({
+  fromToken: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
+  toToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
+  amount: '1000000000000000000', // 1 DAI (in wei)
+  fromChainId: 1,
+  toChainId: 1
+});
+
+console.log('Exchange rate:', quote.exchangeRate);
+console.log('Expected output:', quote.expectedOutput);
+console.log('Price impact:', quote.priceImpact);
+```
+
+## Error Handling
+
+Basic error handling for SDK operations:
+
+```typescript
+try {
+  const result = await machSdk.someOperation();
+  // Handle success
+} catch (error) {
+  if (error.code === 'NETWORK_ERROR') {
+    console.error('Network issues detected');
+  } else if (error.code === 'INSUFFICIENT_FUNDS') {
+    console.error('Insufficient funds for this operation');
+  } else {
+    console.error('An error occurred:', error.message);
+  }
+}
+```
+
+## Next Steps
+
+Now that you understand the basics, you can explore more advanced features:
+
+- [Order Management](/essentials/order-management) - Create and manage orders
+- [Cross-Chain Swaps](/essentials/cross-chain-swaps) - Perform swaps across different blockchains
+- [Wallet Connection](/essentials/wallet-connection) - Advanced wallet connection techniques

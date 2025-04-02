@@ -1,0 +1,233 @@
+---
+title: 'Error Handling'
+description: 'Best practices for handling errors in the Mach SDK'
+---
+
+# Error Handling with Mach SDK
+
+Properly handling errors in your Mach SDK integration is crucial for building robust and user-friendly applications. This guide covers common errors you might encounter and best practices for handling them.
+
+## Error Types
+
+The Mach SDK throws several types of errors that you can handle specifically:
+
+```typescript
+import { MachSDK, MachErrorCode } from '@mach-exchange/sdk';
+
+const machSdk = new MachSDK();
+
+try {
+  // Some SDK operation
+  await machSdk.someOperation();
+} catch (error) {
+  // Check the error type
+  if (error.code === MachErrorCode.NETWORK_ERROR) {
+    console.error('Network error occurred:', error.message);
+  } else if (error.code === MachErrorCode.INSUFFICIENT_FUNDS) {
+    console.error('Insufficient funds:', error.message);
+  } else if (error.code === MachErrorCode.USER_REJECTED) {
+    console.error('User rejected the transaction');
+  } else {
+    console.error('Unknown error:', error);
+  }
+}
+```
+
+## Common Error Codes
+
+Here are some common error codes you might encounter when using the Mach SDK:
+
+| Error Code | Description | Suggested Handling |
+|------------|-------------|-------------------|
+| `NETWORK_ERROR` | Connection to API or blockchain failed | Retry with exponential backoff |
+| `INSUFFICIENT_FUNDS` | User has insufficient funds | Prompt user to add funds |
+| `USER_REJECTED` | User rejected the transaction | Inform user and allow retry |
+| `PRICE_IMPACT_TOO_HIGH` | Price impact exceeds safety threshold | Warn user and request confirmation |
+| `SLIPPAGE_EXCEEDED` | Slippage tolerance was exceeded | Inform user and suggest higher slippage |
+| `ORDER_NOT_FOUND` | Referenced order doesn't exist | Refresh order list |
+| `INVALID_PARAMETERS` | Invalid input parameters | Validate inputs before submission |
+| `WALLET_NOT_CONNECTED` | No wallet is connected | Prompt user to connect wallet |
+| `UNSUPPORTED_CHAIN` | Operation not supported on current chain | Prompt user to switch networks |
+| `TOKEN_NOT_SUPPORTED` | Token not supported for operation | Show list of supported tokens |
+
+## Retry Strategy
+
+For transient errors like network issues, implement a retry strategy:
+
+```typescript
+async function executeWithRetry(operation, maxRetries = 3) {
+  let lastError;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      
+      // Only retry for specific errors
+      if (![
+        MachErrorCode.NETWORK_ERROR,
+        MachErrorCode.RATE_LIMIT_EXCEEDED
+      ].includes(error.code)) {
+        throw error; // Don't retry for other errors
+      }
+      
+      if (attempt < maxRetries) {
+        // Exponential backoff
+        const delay = 1000 * Math.pow(2, attempt - 1);
+        console.log(`Retry attempt ${attempt} after ${delay}ms`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  
+  throw lastError; // All retries failed
+}
+
+// Usage
+try {
+  const result = await executeWithRetry(() => machSdk.getQuote({
+    // Quote parameters...
+  }));
+  console.log('Quote received:', result);
+} catch (error) {
+  console.error('Failed after multiple retries:', error);
+}
+```
+
+## User-Friendly Error Messages
+
+Convert technical errors into user-friendly messages:
+
+```typescript
+function getUserFriendlyErrorMessage(error) {
+  switch (error.code) {
+    case MachErrorCode.NETWORK_ERROR:
+      return "We're having trouble connecting to the exchange. Please check your internet connection and try again.";
+    
+    case MachErrorCode.INSUFFICIENT_FUNDS:
+      return "You don't have enough funds to complete this transaction. Please add more funds to your wallet.";
+    
+    case MachErrorCode.PRICE_IMPACT_TOO_HIGH:
+      return "This trade will have a significant impact on the market price. Please review the details carefully before proceeding.";
+    
+    case MachErrorCode.USER_REJECTED:
+      return "You declined the transaction. No changes were made.";
+    
+    case MachErrorCode.SLIPPAGE_EXCEEDED:
+      return "The price moved unfavorably beyond your slippage tolerance. Try increasing your slippage tolerance or wait for more stable market conditions.";
+    
+    case MachErrorCode.UNSUPPORTED_CHAIN:
+      return "This operation is not supported on the current network. Please switch to a supported network.";
+    
+    default:
+      return `An error occurred: ${error.message}`;
+  }
+}
+
+// Usage
+try {
+  await machSdk.someOperation();
+} catch (error) {
+  const friendlyMessage = getUserFriendlyErrorMessage(error);
+  displayErrorToUser(friendlyMessage);
+  
+  // Still log the technical error for debugging
+  console.error('Technical error details:', error);
+}
+```
+
+## Error Boundary Component (React)
+
+If you're using React, consider creating an error boundary:
+
+```jsx
+import React from 'react';
+
+class MachErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Mach SDK error:', error, errorInfo);
+    // Optionally report to an error tracking service
+  }
+
+  render() {
+    if (this.state.hasError) {
+      const error = this.state.error;
+      const friendlyMessage = getUserFriendlyErrorMessage(error);
+      
+      return (
+        <div className="error-container">
+          <h3>Something went wrong</h3>
+          <p>{friendlyMessage}</p>
+          <button onClick={() => this.setState({ hasError: false, error: null })}>
+            Try Again
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Usage
+function YourComponent() {
+  return (
+    <MachErrorBoundary>
+      <TradeForm />
+    </MachErrorBoundary>
+  );
+}
+```
+
+## Logging and Monitoring
+
+Implement comprehensive logging for production applications:
+
+```typescript
+// Configure global error handler
+machSdk.setErrorHandler((error, context) => {
+  // Log to your monitoring service
+  logErrorToMonitoring(error, {
+    context,
+    user: machSdk.getConnectedWallet()?.address,
+    timestamp: new Date().toISOString()
+  });
+  
+  // You can still handle the error normally
+  return false; // Return true to prevent the error from propagating
+});
+
+function logErrorToMonitoring(error, metadata) {
+  // Example integration with a monitoring service
+  if (typeof window !== 'undefined' && window.errorReportingService) {
+    window.errorReportingService.captureException(error, {
+      extra: metadata
+    });
+  }
+  
+  // Always log to console in development
+  if (process.env.NODE_ENV !== 'production') {
+    console.group('Mach SDK Error');
+    console.error(error);
+    console.info('Context:', metadata);
+    console.groupEnd();
+  }
+}
+```
+
+## Next Steps
+
+Now that you understand how to handle errors in the Mach SDK, you might want to explore:
+
+- [SDK Installation](/essentials/sdk-installation) - Ensure you have the proper setup
+- [Cross-Chain Swaps](/essentials/cross-chain-swaps) - Implement cross-chain swaps with proper error handling
