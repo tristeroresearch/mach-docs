@@ -1,6 +1,5 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "dark",
   "name": "Mach Exchange Docs",
   "colors": {
     "primary": "#202020",
@@ -100,18 +99,18 @@
       "anchors": [
         {
           "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
+          "href": "https://docs.mach.exchange",
           "icon": "book-open-cover"
         },
         {
           "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
+          "href": "https://discord.com/invite/mach",
+          "icon": "discord"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "Website",
+          "href": "https://mach.exchange",
+          "icon": "globe"
         }
       ]
     }
