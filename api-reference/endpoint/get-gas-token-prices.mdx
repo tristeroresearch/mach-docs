@@ -1,0 +1,56 @@
+---
+title: 'Get Gas Token Prices'
+api: 'GET /gas_token_prices'
+description: 'Returns current gas token prices'
+---
+
+This endpoint retrieves the current prices of gas tokens (native tokens) for all supported blockchains.
+
+## Response
+
+The response includes the current prices of gas tokens in USD for each supported blockchain.
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/gas_token_prices'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "ethereum": {
+    "symbol": "ETH",
+    "price": 3500.25
+  },
+  "arbitrum": {
+    "symbol": "ETH",
+    "price": 3500.25
+  },
+  "optimism": {
+    "symbol": "ETH",
+    "price": 3500.25
+  },
+  "avalanche": {
+    "symbol": "AVAX",
+    "price": 28.75
+  },
+  "polygon": {
+    "symbol": "MATIC",
+    "price": 0.65
+  },
+  "solana": {
+    "symbol": "SOL",
+    "price": 145.80
+  }
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Gas token prices returned successfully |
+| 500 | Internal Server Error - Something went wrong on the server |

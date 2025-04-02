@@ -1,0 +1,278 @@
+---
+title: "Wallet Integration"
+description: "Best practices for integrating wallets with Mach Exchange"
+---
+
+# Wallet Integration
+
+A smooth wallet integration is crucial for providing a seamless user experience when interacting with Mach Exchange. This guide outlines best practices for wallet integration based on proven implementations.
+
+## Multi-Chain Wallet Support
+
+When integrating with Mach Exchange, it's important to support multiple wallet types to accommodate different blockchain ecosystems:
+
+- **EVM Wallets**: For Ethereum, Arbitrum, Optimism, Base, and other EVM chains
+- **Solana Wallets**: For interacting with the Solana ecosystem
+- **Tron Wallets**: For Tron blockchain interactions
+
+## Wallet Connection UI
+
+### Connection Button
+
+The wallet connection button should:
+
+1. Clearly indicate the current connection state (connected/disconnected)
+2. Display relevant wallet information when connected
+3. Provide easy access to connection options for different chains
+
+```tsx
+function ConnectButton() {
+  const { isConnected, address, chainId } = useWalletState();
+  
+  return (
+    <Button 
+      onClick={isConnected ? openWalletMenu : openConnectModal}
+      variant="primary"
+    >
+      {isConnected ? (
+        <>
+          <WalletIcon />
+          <TruncatedAddress address={address} />
+          <ChainIndicator chainId={chainId} />
+        </>
+      ) : (
+        "Connect Wallet"
+      )}
+    </Button>
+  );
+}
+```
+
+### Wallet Portfolio Drawer
+
+The WalletPortfolioDrawer component is an effective way to show connected wallets and their assets. Key features to implement:
+
+1. **Dynamic Connected Wallet Count**: Display the number of connected wallets with proper singular/plural handling (e.g., "1 Connected Wallet" vs "2 Connected Wallets")
+
+```tsx
+function WalletHeader({ wallets }) {
+  const count = wallets.length;
+  return (
+    <HeaderText>
+      {count} Connected {count === 1 ? 'Wallet' : 'Wallets'}
+    </HeaderText>
+  );
+}
+```
+
+2. **Chain Indicators**: Show chain icons as small badges at the bottom right of wallet connector icons:
+
+```tsx
+function WalletItem({ wallet }) {
+  return (
+    <WalletContainer>
+      <WalletIcon type={wallet.type} />
+      <ChainBadge
+        position="bottomRight"
+        chainType={getChainType(wallet.chainId)}
+      />
+      <WalletDetails>
+        <WalletName>{wallet.name}</WalletName>
+        <WalletAddress>{formatAddress(wallet.address)}</WalletAddress>
+      </WalletDetails>
+    </WalletContainer>
+  );
+}
+
+function ChainBadge({ chainType, position }) {
+  let logoURI;
+  
+  // Determine logo based on chain type
+  if (chainType === 'solana') {
+    logoURI = SOLANA_LOGO_URI;
+  } else if (chainType === 'tron') {
+    logoURI = TRON_LOGO_URI;
+  } else {
+    // For EVM chains, use chain-specific logo when available
+    logoURI = getChainLogoURI(chainType);
+  }
+  
+  return (
+    <BadgeContainer position={position}>
+      <ChainIcon src={logoURI} size="small" />
+    </BadgeContainer>
+  );
+}
+```
+
+3. **Chain Filtering**: Implement a chain filter to allow users to filter tokens by different blockchain networks:
+
+```tsx
+function TokenList({ tokens }) {
+  const [selectedChain, setSelectedChain] = useState('all');
+  
+  // Filter tokens based on selected chain
+  const filteredTokens = useMemo(() => {
+    if (selectedChain === 'all') return tokens;
+    
+    return tokens.filter(token => {
+      if (selectedChain === 'evm' && isEVMChain(token.chainId)) return true;
+      if (selectedChain === 'solana' && token.chainId === 'solana') return true;
+      if (selectedChain === 'tron' && token.chainId === 'tron') return true;
+      return false;
+    });
+  }, [tokens, selectedChain]);
+  
+  // Calculate balance for filtered tokens
+  const filteredBalance = useMemo(() => {
+    return filteredTokens.reduce((sum, token) => sum + token.balanceUsd, 0);
+  }, [filteredTokens]);
+  
+  return (
+    <>
+      <ChainTabs
+        selectedChain={selectedChain}
+        onChange={setSelectedChain}
+        // Sort chain tabs based on asset value (highest to lowest)
+        chainValues={calculateChainValues(tokens)}
+      />
+      <BalanceDisplay value={filteredBalance} />
+      <TokenGrid tokens={filteredTokens} />
+    </>
+  );
+}
+```
+
+## Wallet Connection Flow
+
+Implement a clear wallet connection flow that guides users through the process:
+
+1. **Initial Connection**: Prompt users to connect their wallet when they first interact with Mach-related features
+2. **Chain Selection**: Allow users to select which chain they want to connect to
+3. **Wallet Selection**: Present wallet options based on the selected chain
+4. **Connection Confirmation**: Show a confirmation when the wallet is successfully connected
+
+```tsx
+function WalletConnectionFlow() {
+  const [step, setStep] = useState('chain-selection');
+  const [selectedChain, setSelectedChain] = useState(null);
+  const [selectedWalletType, setSelectedWalletType] = useState(null);
+  
+  // Get available wallet types for the selected chain
+  const walletOptions = useMemo(() => {
+    if (!selectedChain) return [];
+    return getWalletOptionsForChain(selectedChain);
+  }, [selectedChain]);
+  
+  // Handle connection process
+  const connectWallet = async () => {
+    try {
+      await connectToWallet(selectedChain, selectedWalletType);
+      setStep('success');
+    } catch (error) {
+      setStep('error');
+      console.error('Wallet connection failed:', error);
+    }
+  };
+  
+  return (
+    <Modal>
+      {step === 'chain-selection' && (
+        <ChainSelectionView
+          onSelect={(chain) => {
+            setSelectedChain(chain);
+            setStep('wallet-selection');
+          }}
+        />
+      )}
+      
+      {step === 'wallet-selection' && (
+        <WalletSelectionView
+          options={walletOptions}
+          onSelect={(wallet) => {
+            setSelectedWalletType(wallet);
+            connectWallet();
+          }}
+        />
+      )}
+      
+      {step === 'success' && (
+        <SuccessView onContinue={() => closeModal()} />
+      )}
+      
+      {step === 'error' && (
+        <ErrorView onRetry={() => setStep('chain-selection')} />
+      )}
+    </Modal>
+  );
+}
+```
+
+## Supporting Multiple Connected Wallets
+
+Mach's cross-chain capabilities mean users might want to connect multiple wallets across different chains simultaneously. Your integration should:
+
+1. Track all connected wallets separately
+2. Display appropriate information for each wallet
+3. Use the correct wallet for each transaction based on the chain
+
+```tsx
+function useMultiWalletState() {
+  const [connectedWallets, setConnectedWallets] = useState([]);
+  
+  // Add a new wallet connection
+  const addWalletConnection = (wallet) => {
+    setConnectedWallets(prev => [...prev, wallet]);
+  };
+  
+  // Remove a wallet connection
+  const removeWalletConnection = (walletId) => {
+    setConnectedWallets(prev => prev.filter(w => w.id !== walletId));
+  };
+  
+  // Get the appropriate wallet for a given chain
+  const getWalletForChain = (chainId) => {
+    return connectedWallets.find(wallet => wallet.chainId === chainId);
+  };
+  
+  return {
+    connectedWallets,
+    addWalletConnection,
+    removeWalletConnection,
+    getWalletForChain
+  };
+}
+```
+
+## Chain-Specific Considerations
+
+Different blockchain ecosystems have their own unique considerations for wallet integration:
+
+### EVM Wallets
+
+- Support popular EVM wallets like MetaMask, WalletConnect, Coinbase Wallet
+- Handle chain switching for multi-chain EVM wallets
+- Manage approvals for ERC-20 tokens
+
+### Solana Wallets
+
+- Support Phantom, Solflare, and other Solana wallets
+- Use Solana-specific signing methods
+- Handle Solana's different address format
+
+### Tron Wallets
+
+- Support TronLink and other Tron-compatible wallets
+- Manage energy and bandwidth resources for Tron transactions
+- Handle Tron's different address format (starting with "T")
+
+## Best Practices
+
+1. **Error Handling**: Provide clear error messages when wallet connections fail
+2. **Visual Feedback**: Show loading states during connection attempts
+3. **Chain Indicators**: Use consistent chain badges/icons to indicate which chain a wallet or token belongs to
+4. **Persistence**: Remember user's wallet connections where appropriate (with user consent)
+5. **Mobile Support**: Ensure wallet connection flows work well on mobile devices
+6. **Security**: Never ask for or store private keys or seed phrases
+
+By following these best practices, you can create a seamless wallet integration experience that supports Mach Exchange's cross-chain capabilities while providing users with a clear and intuitive interface.

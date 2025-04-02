@@ -1,0 +1,47 @@
+---
+title: 'Get Gas Estimate'
+api: 'GET /v1/orders/gas'
+description: 'Estimates gas costs for a specific chain'
+---
+
+This endpoint provides an estimation of gas costs for a specific blockchain. It returns the gas estimate and gas price in the chain's native format, which can be used to calculate the total gas cost for transactions on that chain.
+
+## Query Parameters
+
+<ParamField query="chain" type="string" required>
+  The chain identifier (e.g., "avalanche", "ethereum")
+</ParamField>
+
+## Response
+
+<ResponseField name="gas_estimate" type="integer">
+  Estimated gas units required for a typical transaction
+</ResponseField>
+
+<ResponseField name="gas_price" type="integer">
+  Current gas price in the chain's native format (e.g., wei)
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/orders/gas?chain=avalanche'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "gas_estimate": 21000,
+  "gas_price": 25000000000
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Gas estimate returned successfully |
+| 422 | Validation Error - Invalid chain parameter |
+| 500 | Internal Server Error - Something went wrong on the server |

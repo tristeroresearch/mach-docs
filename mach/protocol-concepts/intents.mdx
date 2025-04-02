@@ -1,0 +1,45 @@
+---
+title: "Intents"
+description: "User-focused transaction model for cross-chain operations"
+---
+
+# Intents
+
+In the Mach protocol, an **Intent** refers to a high-level description of what a user wants to accomplish, rather than the specific steps needed to execute that action. This action could be anything from swapping assets, transferring funds, or fulfilling trades. The protocol handles the details, ensuring that the specified action is completed efficiently and securely across different blockchain networks.
+
+## Understanding Intents
+
+In other words, an intent is just that — the "intent" of the user to perform a certain action, without having to specify exactly how that action should be carried out. This abstraction allows for:
+
+1. **Simplified User Experience**: Users can focus on what they want to achieve, not how to achieve it
+2. **Flexible Execution**: The protocol can choose the optimal path for fulfilling the intent
+3. **Cross-Chain Compatibility**: Intents can be executed across multiple blockchains seamlessly
+
+## Intents in Mach v2
+
+Through Mach v2, users can exceed the speed of sound (Mach) and go supersonic through the implementation of a novel optimistic, intents-based architecture. 
+
+Key advantages of this approach:
+
+- **Optimistic Processing**: Rather than relying on message-passing to mirror orders across chains, the protocol only uses messaging as an extra layer of security
+- **Speed**: Transactions process much faster than traditional cross-chain methods
+- **Capital Efficiency**: Better utilization of assets across different blockchains
+- **Solver Competition**: Multiple solvers can compete to fill orders, resulting in better prices for users
+
+## How Intents Work
+
+1. **User Submits Intent**: A user specifies what they want to accomplish (e.g., "I want to swap 100 USDC on Arbitrum for USDT on Optimism")
+2. **Intent Processing**: The Mach protocol processes this intent, finding the optimal path for execution
+3. **Solver Competition**: Market makers and liquidity providers compete to fulfill the intent at the best price
+4. **Execution**: The winning solver executes the intent, with the protocol ensuring security and efficiency
+5. **Settlement**: The transaction is settled optimistically, with the challenge system providing security
+
+## Benefits of the Intents-Based Framework
+
+Mach's optimistic, intents-based framework is the first of its kind, and it breaks past the slow speeds and capital inefficiency of its predecessors. Benefits include:
+
+- **User-Centric Design**: Focus on what users want to achieve
+- **Abstraction of Complexity**: Hide blockchain complexities from end-users
+- **Better Prices**: Competition among solvers leads to better execution prices
+- **Composability**: Intents can be combined for complex operations
+- **Future-Proof**: The abstraction layer allows for easier adaptation to new blockchain protocols and technologies

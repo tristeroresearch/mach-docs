@@ -1,0 +1,118 @@
+---
+title: "Security Best Practices"
+description: "Guidelines for securely using Mach Exchange"
+---
+
+# Security Best Practices
+
+This guide provides important security recommendations for safely trading and interacting with Mach Exchange. While Mach is built with security as a fundamental principle, these best practices will help ensure your assets remain protected.
+
+## Wallet Security
+
+### Choose a Secure Wallet
+
+- Use hardware wallets (e.g., Ledger, Trezor) for large trades or holdings
+- For software wallets, use reputable options like MetaMask, Coinbase Wallet, or a compatible mobile wallet
+- Enable all available security features, including:
+  - Biometric authentication
+  - App-level passwords
+  - Transaction confirmations
+
+### Protect Your Private Keys and Seed Phrases
+
+- Never share your private keys or seed phrases with anyone
+- Store backup copies offline in secure, physically protected locations
+- Consider using a secure password manager for digital backups
+- Split seed phrases across multiple secure locations for higher security
+
+## Transaction Safety
+
+### Always Verify Transaction Details
+
+- Double-check token symbols, amounts, and destination addresses before confirming
+- Verify that gas fees are reasonable for the current network conditions
+- Be particularly careful when approving token access - only grant access to trusted protocols
+- Review the transaction data when possible to confirm it matches your expectations
+
+### Start Small
+
+- For your first trades on Mach, start with small amounts to verify everything works as expected
+- Increase trade sizes only after successfully completing smaller transactions
+- This approach minimizes risk if there's any misunderstanding of the platform's functionality
+
+## Account Protection
+
+### Use a Dedicated Trading Wallet
+
+- Create a separate wallet specifically for trading activities
+- Keep most of your assets in cold storage and transfer only what you need for trading
+- This practice limits exposure if your trading wallet is ever compromised
+
+### Regular Security Audits
+
+- Periodically review your wallet's approved contracts and revoke unnecessary permissions
+- Use tools like [Revoke.cash](https://revoke.cash/) to manage token approvals
+- Monitor your wallet for any unusual transaction history
+
+## Platform-Specific Security
+
+### Connect to the Official Mach Website
+
+- Always access Mach Exchange through the official URL: [https://www.mach.exchange](https://www.mach.exchange)
+- Bookmark the official site to prevent phishing attacks
+- Verify the SSL certificate (look for the lock icon in your browser)
+
+### Use Official Support Channels
+
+- Only seek support through official Mach channels (Discord, Telegram, or email)
+- Team members will never ask for your private keys or seed phrases
+- Be wary of unsolicited direct messages offering help or special deals
+
+## Cross-Chain Swap Considerations
+
+### Understand the Challenge System
+
+- Familiarize yourself with how Mach's [challenge system](/mach/protocol-concepts/challenge-system) works
+- This system is designed to ensure transaction security across chains
+- If a swap is challenged, remain patient while the system resolves any discrepancies
+
+### Monitor Your Orders
+
+- Keep track of your orders in the app's order history section
+- For larger trades, stay online until the order completes
+- If an order appears stuck, use official support channels for assistance
+
+## Best Practices for Developers
+
+### Contract Interaction Security
+
+- Always use the latest version of the Mach SDK
+- Implement proper error handling in your applications
+- Include transaction confirmations and clear user feedback
+- Test thoroughly on testnets before deploying to production
+
+### API Security
+
+- Never hardcode API keys in client-side code
+- Implement proper rate limiting and error handling
+- Use secure authentication methods for private API endpoints
+- Keep dependencies updated to avoid security vulnerabilities
+
+## Reporting Security Issues
+
+If you discover a potential security vulnerability within Mach Exchange:
+
+1. **Do not** publicly disclose the issue
+2. Contact the Mach security team immediately at security@mach.exchange
+3. Provide detailed information about the vulnerability
+4. Follow responsible disclosure practices
+
+The Mach team takes security reports very seriously and will respond promptly to all legitimate concerns.
+
+## Staying Informed
+
+- Follow Mach Exchange on [Twitter](https://twitter.com/machexchange) for official announcements
+- Join the [Discord community](https://discord.gg/mach-exchange) for updates and security alerts
+- Subscribe to the newsletter on the Mach website
+
+By following these security best practices, you can enjoy a safe and secure trading experience on Mach Exchange. Remember that security is a shared responsibility between users and the platform.

@@ -1,0 +1,95 @@
+---
+title: 'Get All Tokens'
+api: 'GET /v1/tokens/get_all_tokens_from_db'
+description: 'Fetches all tokens or tokens for a specific chain'
+---
+
+This endpoint retrieves information about all tokens supported by Mach Exchange. If a chain parameter is provided, it will return only tokens for that specific blockchain.
+
+## Query Parameters
+
+<ParamField query="chain" type="string">
+  (Optional) Blockchain chain identifier (e.g., "ethereum", "arbitrum")
+</ParamField>
+
+## Response
+
+An array of token objects, each containing:
+
+<ResponseField name="chain" type="string">
+  Blockchain chain identifier
+</ResponseField>
+
+<ResponseField name="symbol" type="string">
+  Token symbol (e.g., "USDC", "WETH")
+</ResponseField>
+
+<ResponseField name="address" type="string">
+  Token contract address
+</ResponseField>
+
+<ResponseField name="decimals" type="integer">
+  Token decimal places
+</ResponseField>
+
+<ResponseField name="usd_est" type="number">
+  Estimated USD value of 1 token unit (can be null)
+</ResponseField>
+
+<ResponseField name="is_wrapped" type="boolean">
+  Whether the token is a wrapped token
+</ResponseField>
+
+<ResponseField name="cex_tickers" type="object">
+  Centralized exchange ticker mappings
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Token name
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/tokens/get_all_tokens_from_db?chain=arbitrum'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+[
+  {
+    "chain": "arbitrum",
+    "symbol": "USDC",
+    "address": "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+    "decimals": 6,
+    "usd_est": 1,
+    "is_wrapped": false,
+    "cex_tickers": {
+      "binance": "USDC"
+    },
+    "name": "USD Coin"
+  },
+  {
+    "chain": "arbitrum",
+    "symbol": "WETH",
+    "address": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+    "decimals": 18,
+    "usd_est": 3500,
+    "is_wrapped": true,
+    "cex_tickers": {
+      "binance": "ETH"
+    },
+    "name": "Wrapped Ether"
+  }
+]
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Token list returned successfully |
+| 422 | Validation Error - Invalid chain parameter |
+| 500 | Internal Server Error - Something went wrong on the server |

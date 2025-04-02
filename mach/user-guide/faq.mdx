@@ -1,0 +1,123 @@
+---
+title: "Frequently Asked Questions"
+description: "Common questions about using Mach Exchange"
+---
+
+# Frequently Asked Questions
+
+This page addresses common questions about Mach Exchange and its functionality. If you don't find an answer to your question, please reach out to the community on [Discord](https://discord.gg/mach-exchange) or [Telegram](https://t.me/machexchange).
+
+## General Questions
+
+### What is Mach Exchange?
+
+Mach Exchange is a platform that enables fast, secure cross-chain swaps between different blockchain networks. It uses an optimistic settlement system to deliver quick transaction finality while maintaining high security standards.
+
+### Which blockchains does Mach support?
+
+Mach currently supports several major blockchains, including:
+- Arbitrum
+- Optimism
+- Avalanche
+- Base
+- Solana
+
+The list of supported chains is continuously expanding.
+
+### What tokens can I swap on Mach?
+
+Mach supports a wide range of stablecoins and tokens across its supported chains. The most commonly traded assets include USDC, USDT, DAI, and native tokens. You can view the full list of supported tokens in the app or by checking the [configuration endpoint](/api-reference/endpoint/get-config).
+
+## Trading Questions
+
+### How long do swaps take to complete?
+
+Most swaps on Mach complete within 10-15 seconds. However, during periods of high network congestion or for certain chain combinations, it might take slightly longer.
+
+### What fees does Mach charge?
+
+Mach's fee structure includes:
+1. **Spread**: The difference between the buying and selling price
+2. **Gas Fees**: Network transaction costs on both source and destination chains
+3. **Bond Fee**: A small fee on the bond amount that secures the transaction
+
+Exact fees are always displayed before you confirm a transaction.
+
+### Why do my funds stay in my wallet until a match is found?
+
+This is one of Mach's key security features. By keeping your funds in your wallet until a match is found, Mach eliminates custody risk and improves capital efficiency. Your funds are only moved when they're ready to be swapped.
+
+### What happens if my swap fails?
+
+If a swap fails for any reason, your funds either remain in your wallet (if they were never pulled) or are returned to your wallet. Mach's challenge system ensures that funds are properly accounted for in all scenarios.
+
+## Technical Questions
+
+### What is optimistic settlement?
+
+Optimistic settlement is a mechanism that allows transactions to be processed quickly by assuming they'll be valid, while still providing security guarantees. In Mach, this means transactions can complete in seconds instead of waiting for full cross-chain confirmation. Learn more in our [optimistic settlement guide](/mach/protocol-concepts/optimistic-settlement).
+
+### How does the challenge system protect my funds?
+
+The challenge system is a security layer that monitors transactions for discrepancies. If an issue is detected, it automatically freezes the process and initiates a verification procedure. This ensures that funds are never lost due to technical issues or malicious activity. Read more about the [challenge system](/mach/protocol-concepts/challenge-system).
+
+### Can I use Mach programmatically or integrate it into my application?
+
+Yes! Mach provides a comprehensive API and SDK for developers to integrate cross-chain swap functionality into their applications. Check out our [integration guide](/mach/developer-guides/integrating-mach) and [API reference](/api-reference/integration-endpoints) for details.
+
+## Wallet and Account Questions
+
+### Which wallets are compatible with Mach?
+
+Mach supports most major Web3 wallets, including:
+- MetaMask
+- Coinbase Wallet
+- WalletConnect-compatible wallets
+- Ledger and Trezor hardware wallets
+- Phantom (for Solana)
+
+### Do I need to create an account to use Mach?
+
+No, you don't need to create a traditional account. Simply connect your Web3 wallet to start using Mach immediately. Your wallet address serves as your identity on the platform.
+
+### Is KYC required to use Mach?
+
+No, Mach is a decentralized protocol that doesn't require KYC to use the basic swap functionality. However, certain features or high-volume trading might have additional requirements in some jurisdictions.
+
+## Troubleshooting
+
+### My transaction is pending for a long time. What should I do?
+
+If your transaction has been pending for more than 15 minutes:
+1. Check the status in the "Orders" section of the app
+2. Verify that you have sufficient gas tokens on both chains
+3. If the issue persists, reach out to support with your transaction details
+
+### Why am I getting a "slippage too high" error?
+
+This error occurs when the price moves significantly between when you request a quote and when you confirm the transaction. You can:
+1. Try again with a fresh quote
+2. Adjust your slippage tolerance in the settings
+3. Trade during periods of lower market volatility
+
+### I approved a token but my transaction failed. Will I be charged again?
+
+No, token approvals are one-time permissions that allow the Mach contracts to access a specific token in your wallet. Once approved, you won't need to approve that token again unless you revoke the permission or change wallets.
+
+## Market Making and Advanced Features
+
+### How can I become a market maker on Mach?
+
+To become a market maker:
+1. Review the [market making guide](/mach/developer-guides/market-making)
+2. Set up the necessary infrastructure and liquidity
+3. Connect to Mach's API to receive and fill orders
+4. Start with smaller orders and scale up as you gain experience
+
+### What are limit orders and how do they work?
+
+Limit orders allow you to specify the exact price at which you want to execute a trade. Instead of trading at the current market price, your order waits until your specified price is reached. Learn more in the [orderbook and limit orders](/mach/protocol-concepts/orderbook-and-limit-orders) documentation.
+
+### Does Mach offer any rewards or incentive programs?
+
+Mach occasionally runs incentive programs for users and market makers. These can include trading competitions, fee discounts, or token rewards. Follow Mach on social media or join the Discord server to stay updated on current and upcoming programs.

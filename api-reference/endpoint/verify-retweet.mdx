@@ -1,0 +1,56 @@
+---
+title: 'Verify Retweet'
+api: 'POST /v1/twitter/verify_retweet'
+description: 'Verifies if a user has retweeted a specific tweet'
+---
+
+This endpoint verifies whether a user has retweeted a specific tweet, which can be used as part of social engagement tasks or rewards programs.
+
+## Request Body
+
+<ParamField body="wallet" type="string" required>
+  The wallet address of the user
+</ParamField>
+
+<ParamField body="username" type="string" required>
+  The Twitter username
+</ParamField>
+
+<ParamField body="tweet_id" type="string" required>
+  The ID of the tweet to verify
+</ParamField>
+
+## Response
+
+<ResponseField name="verified" type="boolean">
+  Whether the retweet has been verified
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request POST \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/twitter/verify_retweet' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "wallet": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+    "username": "user123",
+    "tweet_id": "1512345678901234567"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "verified": true
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Verification status returned successfully |
+| 422 | Validation Error - Invalid parameters |
+| 500 | Internal Server Error - Something went wrong on the server |

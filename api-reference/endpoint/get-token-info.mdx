@@ -1,0 +1,83 @@
+---
+title: 'Get Token Info'
+api: 'GET /v1/tokens/token_info'
+description: 'Fetches token information for a specific token on a blockchain'
+---
+
+This endpoint retrieves detailed information about a specific token on a particular blockchain, including its symbol, address, decimals, and other metadata.
+
+## Query Parameters
+
+<ParamField query="chain" type="string" required>
+  Blockchain chain identifier (e.g., "ethereum", "avalanche")
+</ParamField>
+
+<ParamField query="token_address" type="string" required>
+  Ethereum token contract address
+</ParamField>
+
+## Response
+
+<ResponseField name="chain" type="string">
+  Blockchain chain identifier
+</ResponseField>
+
+<ResponseField name="symbol" type="string">
+  Token symbol (e.g., "USDC")
+</ResponseField>
+
+<ResponseField name="address" type="string">
+  Token contract address
+</ResponseField>
+
+<ResponseField name="decimals" type="integer">
+  Token decimal places
+</ResponseField>
+
+<ResponseField name="usd_est" type="number">
+  Estimated USD value of 1 token unit (can be null)
+</ResponseField>
+
+<ResponseField name="is_wrapped" type="boolean">
+  Whether the token is a wrapped token
+</ResponseField>
+
+<ResponseField name="cex_tickers" type="object">
+  Centralized exchange ticker mappings
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Token name
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/tokens/token_info?chain=arbitrum&token_address=0xff970a61a04b1ca14834a43f5de4533ebddb5cc8'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "chain": "arbitrum",
+  "symbol": "USDC",
+  "address": "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+  "decimals": 6,
+  "usd_est": 1,
+  "is_wrapped": false,
+  "cex_tickers": {
+    "binance": "USDC"
+  },
+  "name": "USD Coin"
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Token information returned successfully |
+| 422 | Validation Error - Invalid parameters |
+| 500 | Internal Server Error - Something went wrong on the server |

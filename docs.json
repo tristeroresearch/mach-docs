@@ -1,15 +1,31 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Mach Exchange Docs",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#202020",
+    "light": "#404040",
+    "dark": "#171717"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
+      {
+        "tab": "Mach",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "mach/index",
+              "mach/getting-started/mach-architecture",
+              "mach/getting-started/multi-chain-support",
+              "mach/getting-started/wallet-integration",
+              "mach/getting-started/integrating-mach",
+              "mach/getting-started/community"
+            ]
+          }
+        ]
+      },
       {
         "tab": "Guides",
         "groups": [
@@ -40,16 +56,31 @@
           {
             "group": "API Documentation",
             "pages": [
-              "api-reference/introduction"
+              "api-reference/introduction",
+              "api-reference/integration-endpoints"
             ]
           },
           {
-            "group": "Endpoint Examples",
+            "group": "Mach API Endpoints",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api-reference/endpoint/get-config",
+              "api-reference/endpoint/estimate-gas",
+              "api-reference/endpoint/request-quote",
+              "api-reference/endpoint/submit-order",
+              "api-reference/endpoint/get-user-orders",
+              "api-reference/endpoint/get-order-status",
+              "api-reference/endpoint/cctp-order",
+              "api-reference/endpoint/get-token-info",
+              "api-reference/endpoint/get-all-tokens",
+              "api-reference/endpoint/get-all-points",
+              "api-reference/endpoint/get-wallet-points",
+              "api-reference/endpoint/get-referral-code",
+              "api-reference/endpoint/get-recent-tweet-id",
+              "api-reference/endpoint/verify-retweet",
+              "api-reference/endpoint/submit-user-data",
+              "api-reference/endpoint/get-token-balances",
+              "api-reference/endpoint/get-gas-token-prices",
+              "api-reference/endpoint/ping"
             ]
           }
         ]
@@ -82,21 +113,23 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "label": "Community",
+        "href": "https://discord.com/invite/mach"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "App",
+      "href": "https://app.mach.exchange"
     }
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "website": "https://mach.exchange",
+      "twitter": "https://x.com/mach_exchange",
+      "github": "https://github.com/mach-exchange",
+      "discord": "https://discord.com/invite/mach",
+      "telegram": "https://t.me/mach_exchange"
     }
   }
 }

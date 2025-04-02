@@ -1,0 +1,52 @@
+---
+title: 'Get Referral Code'
+api: 'POST /v1/points/referral_code/{referral_code}'
+description: 'Gets information about a referral code'
+---
+
+This endpoint retrieves information about a specific referral code, including the referrer wallet address and the percentage of the reward.
+
+## Path Parameters
+
+<ParamField path="referral_code" type="string" required>
+  The referral code to look up
+</ParamField>
+
+## Response
+
+<ResponseField name="code" type="string">
+  The referral code
+</ResponseField>
+
+<ResponseField name="percentage" type="integer">
+  Percentage of the reward given for using this code
+</ResponseField>
+
+<ResponseField name="referrer" type="string">
+  Wallet address of the referrer who created the code
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request POST \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/points/referral_code/ABC'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "code": "ABC",
+  "percentage": 10,
+  "referrer": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106"
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Referral code information returned successfully |
+| 422 | Validation Error - Invalid referral code format |
+| 500 | Internal Server Error - Something went wrong on the server |

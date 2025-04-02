@@ -1,0 +1,64 @@
+---
+title: 'Get Gas Estimate'
+api: 'GET /v1/orders/gas'
+description: 'Retrieves gas price estimates for a specified chain'
+---
+
+This endpoint provides current gas price estimates for a specified blockchain network. These estimates are essential for calculating transaction costs and ensuring efficient execution of cross-chain swaps.
+
+## Query Parameters
+
+<ParamField query="chain" type="string" required>
+  Chain identifier (e.g., "avalanche", "arbitrum", "optimism")
+</ParamField>
+
+## Response
+
+<ResponseField name="gas_estimate" type="integer">
+  Estimated gas units required for a standard transaction on the specified chain
+</ResponseField>
+
+<ResponseField name="gas_price" type="integer">
+  Current gas price in wei for the specified chain
+</ResponseField>
+
+## Usage Guidance
+
+- Gas prices are dynamic and can change rapidly based on network congestion
+- These estimates should be used as a reference rather than exact values
+- For high-value transactions, consider adding a buffer to ensure execution
+- The gas_estimate value is based on standard transactions; complex operations may require more gas
+
+## Examples of Chain Identifiers
+
+| Chain Identifier | Network Name  | Chain ID |
+|------------------|---------------|----------|
+| arbitrum         | Arbitrum One  | 42161    |
+| optimism         | Optimism      | 10       |
+| avalanche        | Avalanche C   | 43114    |
+| base             | Base          | 8453     |
+| solana           | Solana        | 1399811149 |
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/orders/gas?chain=avalanche'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "gas_estimate": 21000,
+  "gas_price": 25000000000
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Gas estimate returned successfully |
+| 400 | Bad Request - Invalid chain identifier |
+| 500 | Internal Server Error - Something went wrong on the server |

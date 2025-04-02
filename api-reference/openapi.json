@@ -1,94 +1,922 @@
 {
-  "openapi": "3.1.0",
-  "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
+    "openapi": "3.1.0",
+    "info": {
+      "title": "FastAPI",
+      "version": "0.1.0"
     },
-    "version": "1.0.0"
-  },
-  "servers": [
-    {
-      "url": "http://sandbox.mintlify.com"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
-  "paths": {
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plant response",
+    "paths": {
+      "/v1/orders": {
+        "post": {
+          "tags": [
+            "orders"
+          ],
+          "summary": "Submit Order Request",
+          "operationId": "submit_order_request_v1_orders_post",
+          "requestBody": {
+            "required": true,
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+                  "$ref": "#/components/schemas/OrderRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OrderResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "get": {
+          "tags": [
+            "orders"
+          ],
+          "summary": "Get Orders For Wallet",
+          "operationId": "get_orders_for_wallet_v1_orders_get",
+          "parameters": [
+            {
+              "name": "wallet",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Wallet"
+              },
+              "example": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/OrderResponse"
+                    },
+                    "title": "Response Get Orders For Wallet V1 Orders Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/orders/gas": {
+        "get": {
+          "tags": [
+            "orders"
+          ],
+          "summary": "Get Gas Estimate",
+          "operationId": "get_gas_estimate_v1_orders_gas_get",
+          "parameters": [
+            {
+              "name": "chain",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "$ref": "#/components/schemas/Chain"
+              },
+              "example": "avalanche"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GasResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/orders/{order_id}": {
+        "get": {
+          "tags": [
+            "orders"
+          ],
+          "summary": "Get Order From Id",
+          "operationId": "get_order_from_id_v1_orders__order_id__get",
+          "parameters": [
+            {
+              "name": "order_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Order Id"
+              },
+              "example": "6368f169-d9ad-53ec-b797-81b4dc74c257"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OrderResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/orders/cctp": {
+        "post": {
+          "tags": [
+            "orders"
+          ],
+          "summary": "Receive Cctp",
+          "operationId": "receive_cctp_v1_orders_cctp_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CCTPRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OrderResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/quotes": {
+        "post": {
+          "tags": [
+            "quotes"
+          ],
+          "summary": "Request Quote",
+          "operationId": "request_quote_v1_quotes_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Quote"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/points": {
+        "get": {
+          "tags": [
+            "points"
+          ],
+          "summary": "Get All Points",
+          "operationId": "get_all_points_v1_points_get",
+          "parameters": [
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "description": "Number of top wallets to return. Clamped within [1, 100]. Defaults to 10 if not provided.",
+                "default": 10,
+                "title": "Limit"
+              },
+              "description": "Number of top wallets to return. Clamped within [1, 100]. Defaults to 10 if not provided.",
+              "example": 10
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/WalletPoints"
+                    },
+                    "title": "Response Get All Points V1 Points Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/points/{wallet}": {
+        "get": {
+          "tags": [
+            "points"
+          ],
+          "summary": "Get Points For Wallet",
+          "operationId": "get_points_for_wallet_v1_points__wallet__get",
+          "parameters": [
+            {
+              "name": "wallet",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Wallet"
+              },
+              "example": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/WalletPoints"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/points/referral_code/{referral_code}": {
+        "post": {
+          "tags": [
+            "points"
+          ],
+          "summary": "Get Referral Code",
+          "operationId": "get_referral_code_v1_points_referral_code__referral_code__post",
+          "parameters": [
+            {
+              "name": "referral_code",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Referral Code"
+              },
+              "example": "ABC"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ReferralCode"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/points/adjust": {
+        "post": {
+          "tags": [
+            "points"
+          ],
+          "summary": "Adjust Points Endpoint",
+          "operationId": "adjust_points_endpoint_v1_points_adjust_post",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/points/generate_referral": {
+        "post": {
+          "tags": [
+            "points"
+          ],
+          "summary": "Generate Referral Endpoint",
+          "operationId": "generate_referral_endpoint_v1_points_generate_referral_post",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/twitter/recent_tweet_id": {
+        "get": {
+          "tags": [
+            "twitter"
+          ],
+          "summary": "Recent Tweet Id",
+          "operationId": "recent_tweet_id_v1_twitter_recent_tweet_id_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/RecentTweetId"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/twitter/verify_retweet": {
+        "post": {
+          "tags": [
+            "twitter"
+          ],
+          "summary": "Verify Retweet",
+          "operationId": "verify_retweet_v1_twitter_verify_retweet_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetweetVerificationRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/TwitterFlowVerification"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/twitter/submit_user_data": {
+        "post": {
+          "tags": [
+            "twitter"
+          ],
+          "summary": "Submit User Data",
+          "operationId": "submit_user_data_v1_twitter_submit_user_data_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmitUserDataRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/TwitterFlowVerification"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/tokens/token_info": {
+        "get": {
+          "tags": [
+            "tokens"
+          ],
+          "summary": "Get Token Info",
+          "description": "Fetches token information based on the provided blockchain chain and token address.\n\nArgs:\n    chain (Chain): The blockchain network identifier (e.g., ethereum).\n    token_address (str): The Ethereum token contract address.\n\nReturns:\n    AssetInfo: Information about the specified token.\n\nRaises:\n    HTTPException: If the chain context is invalid or token information is not found.",
+          "operationId": "get_token_info_v1_tokens_token_info_get",
+          "parameters": [
+            {
+              "name": "chain",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Chain"
+                  }
+                ],
+                "description": "Blockchain chain identifier",
+                "title": "Chain"
+              },
+              "description": "Blockchain chain identifier"
+            },
+            {
+              "name": "token_address",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Ethereum token contract address",
+                "title": "Token Address"
+              },
+              "description": "Ethereum token contract address"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AssetInfo"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/tokens/get_all_tokens_from_db": {
+        "get": {
+          "tags": [
+            "tokens"
+          ],
+          "summary": "Get All Tokens Endpoint",
+          "description": "Fetches all tokens. If a chain is provided, it fetches tokens for that specific chain.\n\nArgs:\n    chain (Chain): The blockchain network identifier (e.g., ethereum).\n\nReturns:\n    List[AssetInfo]: A list of information about the specified tokens.\n\nRaises:\n    HTTPException: If the chain context is invalid or no tokens are found.",
+          "operationId": "get_all_tokens_endpoint_v1_tokens_get_all_tokens_from_db_get",
+          "parameters": [
+            {
+              "name": "chain",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/Chain"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Optional blockchain chain identifier",
+                "title": "Chain"
+              },
+              "description": "Optional blockchain chain identifier"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/AssetInfo"
+                    },
+                    "title": "Response Get All Tokens Endpoint V1 Tokens Get All Tokens From Db Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/": {
+        "get": {
+          "summary": "Read Root",
+          "operationId": "read_root__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/tokenBalances": {
+        "get": {
+          "summary": "Token Balances",
+          "operationId": "token_balances_tokenBalances_get",
+          "parameters": [
+            {
+              "name": "wallet_address",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "pattern": "^(0x[a-fA-F0-9]{40}|[1-9A-HJ-NP-Za-km-z]{32,44})$",
+                "description": "wallet address (supports Ethereum and Solana addresses).",
+                "title": "Wallet Address"
+              },
+              "description": "wallet address (supports Ethereum and Solana addresses).",
+              "example": "0x886431aee6486D68863D2963F3E7BC8683990210"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/gas_token_prices": {
+        "get": {
+          "summary": "Gas Token Prices",
+          "operationId": "gas_token_prices_gas_token_prices_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/ping": {
+        "get": {
+          "summary": "Ping",
+          "operationId": "ping_ping_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/receive_cctp": {
+        "post": {
+          "summary": "Receive Cctp",
+          "operationId": "receive_cctp_receive_cctp_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Body_receive_cctp_receive_cctp_post"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
                   }
                 }
               }
             }
           },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
+          "deprecated": true
+        }
+      },
+      "/get_config": {
+        "get": {
+          "summary": "Get Config",
+          "operationId": "get_config_get_config_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
                 }
               }
             }
           }
         }
       },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
+      "/get_lz_cid": {
+        "get": {
+          "summary": "Get Lz Cid",
+          "operationId": "get_lz_cid_get_lz_cid_get",
+          "parameters": [
+            {
+              "name": "chain_name",
+              "in": "query",
+              "required": true,
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/Chain"
               }
             }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
                 }
               }
             }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "/get_assets": {
+        "get": {
+          "summary": "Get Assets",
+          "operationId": "get_assets_get_assets_get",
+          "parameters": [
+            {
+              "name": "chain_name",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "$ref": "#/components/schemas/Chain"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/estimate_gas": {
+        "get": {
+          "summary": "Estimate Gas",
+          "operationId": "estimate_gas_estimate_gas_get",
+          "parameters": [
+            {
+              "name": "chain_name",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Chain"
+                  }
+                ],
+                "description": "Blockchain name.",
+                "title": "Chain Name"
+              },
+              "description": "Blockchain name."
+            },
+            {
+              "name": "lz_cid",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/LayerZeroID"
+                  }
+                ],
+                "description": "Blockchain layer-0 ID.",
+                "title": "Lz Cid"
+              },
+              "description": "Blockchain layer-0 ID."
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
                 }
               }
             }
@@ -96,122 +924,870 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
+    "components": {
+      "schemas": {
+        "ApiChecksumAddress": {
+          "properties": {
+            "address": {
+              "type": "string",
+              "title": "Address"
+            }
+          },
+          "type": "object",
+          "required": [
+            "address"
+          ],
+          "title": "ApiChecksumAddress"
+        },
+        "AssetInfo": {
+          "properties": {
+            "chain": {
+              "$ref": "#/components/schemas/Chain"
+            },
+            "symbol": {
+              "type": "string",
+              "title": "Symbol"
+            },
+            "address": {
+              "type": "string",
+              "title": "Address"
+            },
+            "decimals": {
               "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
+              "title": "Decimals"
+            },
+            "usd_est": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
                 }
-              }
+              ],
+              "title": "Usd Est"
+            },
+            "is_wrapped": {
+              "type": "boolean",
+              "title": "Is Wrapped",
+              "default": false
+            },
+            "cex_tickers": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object",
+              "title": "Cex Tickers",
+              "default": {}
+            },
+            "name": {
+              "type": "string",
+              "title": "Name",
+              "default": ""
             }
-          }
-        }
-      }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
-        "requestBody": {
-          "description": "Plant added to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
+          },
+          "type": "object",
+          "required": [
+            "chain",
+            "symbol",
+            "address",
+            "decimals"
+          ],
+          "title": "AssetInfo"
+        },
+        "Body_receive_cctp_receive_cctp_post": {
+          "properties": {
+            "placer_address": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ApiChecksumAddress"
+                }
+              ],
+              "examples": [
+                {
+                  "address": "0x451F52446EBD4376d4a05f4267eF1a03Acf1aAf4"
+                }
+              ]
+            },
+            "src_chain_name": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Chain"
+                }
+              ],
+              "examples": [
+                "avalanche",
+                "ethereum",
+                "polygon",
+                "optimism",
+                "arbitrum",
+                "base"
+              ]
+            },
+            "src_burn_tx": {
+              "type": "string",
+              "title": "Src Burn Tx",
+              "examples": [
+                "0x3cdc8d4da0e74b08f453f311e2031b2d518c769cc8d9b5783043a2e35a9e6428"
+              ]
             }
+          },
+          "type": "object",
+          "required": [
+            "placer_address",
+            "src_chain_name",
+            "src_burn_tx"
+          ],
+          "title": "Body_receive_cctp_receive_cctp_post"
+        },
+        "CCTPRequest": {
+          "properties": {
+            "chain": {
+              "$ref": "#/components/schemas/Chain"
+            },
+            "burn_tx": {
+              "type": "string",
+              "title": "Burn Tx"
+            },
+            "solana_token_owner_address": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Solana Token Owner Address"
+            }
+          },
+          "type": "object",
+          "required": [
+            "chain",
+            "burn_tx"
+          ],
+          "title": "CCTPRequest",
+          "example": {
+            "burn_tx": "0x3cdc8d4da0e74b08f453f311e2031b2d518c769cc8d9b5783043a2e35a9e6428",
+            "chain": "avalanche",
+            "solana_token_owner_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
           }
         },
-        "responses": {
-          "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
+        "Chain": {
+          "type": "string",
+          "enum": [
+            "ethereum",
+            "bsc",
+            "avalanche",
+            "polygon",
+            "arbitrum",
+            "optimism",
+            "base",
+            "solana",
+            "celo",
+            "blast",
+            "scroll",
+            "mantle",
+            "opbnb",
+            "mode",
+            "tron",
+            "unichain"
+          ],
+          "title": "Chain"
+        },
+        "GasResponse": {
+          "properties": {
+            "gas_estimate": {
+              "type": "integer",
+              "title": "Gas Estimate"
+            },
+            "gas_price": {
+              "type": "integer",
+              "title": "Gas Price"
             }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
           },
-          "message": {
-            "type": "string"
+          "type": "object",
+          "required": [
+            "gas_estimate",
+            "gas_price"
+          ],
+          "title": "GasResponse"
+        },
+        "HTTPValidationError": {
+          "properties": {
+            "detail": {
+              "items": {
+                "$ref": "#/components/schemas/ValidationError"
+              },
+              "type": "array",
+              "title": "Detail"
+            }
+          },
+          "type": "object",
+          "title": "HTTPValidationError"
+        },
+        "LayerZeroID": {
+          "type": "integer",
+          "enum": [
+            30110,
+            30106,
+            30184,
+            30125,
+            30102,
+            30101,
+            30111,
+            30109,
+            30243,
+            30214,
+            30181,
+            30202,
+            30260,
+            30420,
+            30168,
+            30320
+          ],
+          "title": "LayerZeroID"
+        },
+        "LiquiditySource": {
+          "type": "string",
+          "enum": [
+            "market_maker",
+            "cctp_direct",
+            "unavailable"
+          ],
+          "title": "LiquiditySource"
+        },
+        "OrderData": {
+          "properties": {
+            "contract_address": {
+              "type": "string",
+              "title": "Contract Address"
+            },
+            "order_direction": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "order_funding": {
+              "$ref": "#/components/schemas/QuoteOrderFunding"
+            },
+            "order_expiration": {
+              "$ref": "#/components/schemas/OrderExpiration"
+            },
+            "target_address": {
+              "type": "string",
+              "title": "Target Address"
+            },
+            "filler_address": {
+              "type": "string",
+              "title": "Filler Address"
+            }
+          },
+          "type": "object",
+          "required": [
+            "contract_address",
+            "order_direction",
+            "order_funding",
+            "order_expiration",
+            "target_address",
+            "filler_address"
+          ],
+          "title": "OrderData"
+        },
+        "OrderDirection": {
+          "properties": {
+            "src_token_address": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string",
+                  "format": "binary"
+                }
+              ],
+              "title": "Src Token Address"
+            },
+            "dst_token_address": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string",
+                  "format": "binary"
+                }
+              ],
+              "title": "Dst Token Address"
+            },
+            "src_lzc": {
+              "$ref": "#/components/schemas/LayerZeroID"
+            },
+            "dst_lzc": {
+              "$ref": "#/components/schemas/LayerZeroID"
+            }
+          },
+          "type": "object",
+          "required": [
+            "src_token_address",
+            "dst_token_address",
+            "src_lzc",
+            "dst_lzc"
+          ],
+          "title": "OrderDirection"
+        },
+        "OrderExpiration": {
+          "properties": {
+            "timestamp": {
+              "type": "integer",
+              "title": "Timestamp"
+            },
+            "challenge_offset": {
+              "type": "integer",
+              "title": "Challenge Offset"
+            },
+            "challenge_window": {
+              "type": "integer",
+              "title": "Challenge Window"
+            }
+          },
+          "type": "object",
+          "required": [
+            "timestamp",
+            "challenge_offset",
+            "challenge_window"
+          ],
+          "title": "OrderExpiration"
+        },
+        "OrderRequest": {
+          "properties": {
+            "chain": {
+              "$ref": "#/components/schemas/Chain"
+            },
+            "place_taker_tx": {
+              "type": "string",
+              "title": "Place Taker Tx"
+            },
+            "referral_code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Referral Code"
+            }
+          },
+          "type": "object",
+          "required": [
+            "chain",
+            "place_taker_tx"
+          ],
+          "title": "OrderRequest",
+          "example": {
+            "chain": "optimism",
+            "place_taker_tx": "0x50da55b159ccd423ebcb315dd2949202e584473960008274514c5088f3d26de7",
+            "referral_code": "ABC"
           }
+        },
+        "OrderResponse": {
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "Id"
+            },
+            "taker_address": {
+              "type": "string",
+              "title": "Taker Address"
+            },
+            "maker_address": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Maker Address"
+            },
+            "src_asset_address": {
+              "type": "string",
+              "title": "Src Asset Address"
+            },
+            "dst_asset_address": {
+              "type": "string",
+              "title": "Dst Asset Address"
+            },
+            "src_chain": {
+              "$ref": "#/components/schemas/Chain"
+            },
+            "dst_chain": {
+              "$ref": "#/components/schemas/Chain"
+            },
+            "src_amount": {
+              "type": "integer",
+              "title": "Src Amount"
+            },
+            "dst_amount": {
+              "type": "integer",
+              "title": "Dst Amount"
+            },
+            "created_at": {
+              "type": "string",
+              "title": "Created At"
+            },
+            "filled_at": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filled At"
+            },
+            "expires_at": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Expires At"
+            },
+            "completed": {
+              "type": "boolean",
+              "title": "Completed"
+            },
+            "place_tx": {
+              "type": "string",
+              "title": "Place Tx"
+            },
+            "fill_tx": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fill Tx"
+            },
+            "eta": {
+              "type": "integer",
+              "title": "Eta",
+              "default": 0
+            },
+            "order_type": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/OrderType"
+                }
+              ],
+              "default": "default"
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "taker_address",
+            "src_asset_address",
+            "dst_asset_address",
+            "src_chain",
+            "dst_chain",
+            "src_amount",
+            "dst_amount",
+            "created_at",
+            "completed",
+            "place_tx"
+          ],
+          "title": "OrderResponse"
+        },
+        "OrderType": {
+          "type": "string",
+          "enum": [
+            "default",
+            "cctp"
+          ],
+          "title": "OrderType"
+        },
+        "Quote": {
+          "properties": {
+            "wallet_address": {
+              "type": "string",
+              "title": "Wallet Address"
+            },
+            "src_chain": {
+              "$ref": "#/components/schemas/Chain"
+            },
+            "dst_chain": {
+              "$ref": "#/components/schemas/Chain"
+            },
+            "src_amount": {
+              "type": "string",
+              "title": "Src Amount"
+            },
+            "dst_amount": {
+              "type": "string",
+              "title": "Dst Amount"
+            },
+            "bond_amount": {
+              "type": "string",
+              "title": "Bond Amount"
+            },
+            "bond_fee": {
+              "type": "integer",
+              "title": "Bond Fee"
+            },
+            "src_asset_address": {
+              "type": "string",
+              "title": "Src Asset Address"
+            },
+            "dst_asset_address": {
+              "type": "string",
+              "title": "Dst Asset Address"
+            },
+            "bond_asset_address": {
+              "type": "string",
+              "title": "Bond Asset Address"
+            },
+            "challenge_offset": {
+              "type": "integer",
+              "title": "Challenge Offset"
+            },
+            "challenge_window": {
+              "type": "integer",
+              "title": "Challenge Window"
+            },
+            "invalid_amount": {
+              "type": "boolean",
+              "title": "Invalid Amount"
+            },
+            "liquidity_source": {
+              "$ref": "#/components/schemas/LiquiditySource"
+            },
+            "created_at": {
+              "type": "string",
+              "title": "Created At"
+            },
+            "expires_at": {
+              "type": "string",
+              "title": "Expires At"
+            },
+            "order_data": {
+              "$ref": "#/components/schemas/OrderData"
+            },
+            "destination_transaction_fee": {
+              "type": "integer",
+              "title": "Destination Transaction Fee"
+            },
+            "destination_transaction_fee_usd": {
+              "type": "number",
+              "title": "Destination Transaction Fee Usd"
+            },
+            "destination_transaction_fee_after_subsidy": {
+              "type": "integer",
+              "title": "Destination Transaction Fee After Subsidy"
+            },
+            "destination_transaction_fee_after_subsidy_usd": {
+              "type": "number",
+              "title": "Destination Transaction Fee After Subsidy Usd"
+            },
+            "destination_transaction_fee_subsidy_usd": {
+              "type": "number",
+              "title": "Destination Transaction Fee Subsidy Usd"
+            },
+            "reject_order": {
+              "type": "boolean",
+              "title": "Reject Order"
+            }
+          },
+          "type": "object",
+          "required": [
+            "wallet_address",
+            "src_chain",
+            "dst_chain",
+            "src_amount",
+            "dst_amount",
+            "bond_amount",
+            "bond_fee",
+            "src_asset_address",
+            "dst_asset_address",
+            "bond_asset_address",
+            "challenge_offset",
+            "challenge_window",
+            "invalid_amount",
+            "liquidity_source",
+            "created_at",
+            "expires_at",
+            "order_data",
+            "destination_transaction_fee",
+            "destination_transaction_fee_usd",
+            "destination_transaction_fee_after_subsidy",
+            "destination_transaction_fee_after_subsidy_usd",
+            "destination_transaction_fee_subsidy_usd",
+            "reject_order"
+          ],
+          "title": "Quote"
+        },
+        "QuoteOrderFunding": {
+          "properties": {
+            "src_amount_in": {
+              "type": "string",
+              "title": "Src Amount In"
+            },
+            "dst_amount_out": {
+              "type": "string",
+              "title": "Dst Amount Out"
+            },
+            "bond_token_address": {
+              "type": "string",
+              "title": "Bond Token Address"
+            },
+            "bond_amount": {
+              "type": "string",
+              "title": "Bond Amount"
+            },
+            "bond_fee": {
+              "type": "string",
+              "title": "Bond Fee"
+            }
+          },
+          "type": "object",
+          "required": [
+            "src_amount_in",
+            "dst_amount_out",
+            "bond_token_address",
+            "bond_amount",
+            "bond_fee"
+          ],
+          "title": "QuoteOrderFunding"
+        },
+        "QuoteRequest": {
+          "properties": {
+            "wallet_address": {
+              "type": "string",
+              "title": "Wallet Address",
+              "default": "0x0000000000000000000000000000000000000000"
+            },
+            "target_address": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Target Address"
+            },
+            "src_chain": {
+              "$ref": "#/components/schemas/Chain"
+            },
+            "dst_chain": {
+              "$ref": "#/components/schemas/Chain"
+            },
+            "src_asset_address": {
+              "type": "string",
+              "title": "Src Asset Address"
+            },
+            "dst_asset_address": {
+              "type": "string",
+              "title": "Dst Asset Address"
+            },
+            "src_amount": {
+              "type": "integer",
+              "title": "Src Amount"
+            }
+          },
+          "type": "object",
+          "required": [
+            "src_chain",
+            "dst_chain",
+            "src_asset_address",
+            "dst_asset_address",
+            "src_amount"
+          ],
+          "title": "QuoteRequest",
+          "example": {
+            "dst_asset_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+            "dst_chain": "arbitrum",
+            "src_amount": 1000000,
+            "src_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+            "src_chain": "avalanche",
+            "wallet_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106"
+          }
+        },
+        "RecentTweetId": {
+          "properties": {
+            "tweet": {
+              "type": "string",
+              "title": "Tweet"
+            }
+          },
+          "type": "object",
+          "required": [
+            "tweet"
+          ],
+          "title": "RecentTweetId"
+        },
+        "ReferralCode": {
+          "properties": {
+            "code": {
+              "type": "string",
+              "title": "Code"
+            },
+            "percentage": {
+              "type": "integer",
+              "title": "Percentage"
+            },
+            "referrer": {
+              "type": "string",
+              "title": "Referrer"
+            }
+          },
+          "type": "object",
+          "required": [
+            "code",
+            "percentage",
+            "referrer"
+          ],
+          "title": "ReferralCode"
+        },
+        "RetweetVerificationRequest": {
+          "properties": {
+            "wallet": {
+              "type": "string",
+              "title": "Wallet"
+            },
+            "username": {
+              "type": "string",
+              "title": "Username"
+            },
+            "tweet_id": {
+              "type": "string",
+              "title": "Tweet Id"
+            }
+          },
+          "type": "object",
+          "required": [
+            "wallet",
+            "username",
+            "tweet_id"
+          ],
+          "title": "RetweetVerificationRequest"
+        },
+        "SubmitUserDataRequest": {
+          "properties": {
+            "wallet": {
+              "type": "string",
+              "title": "Wallet"
+            },
+            "twitter_handle": {
+              "type": "string",
+              "title": "Twitter Handle"
+            },
+            "telegram_handle": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Telegram Handle"
+            },
+            "email": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Email"
+            }
+          },
+          "type": "object",
+          "required": [
+            "wallet",
+            "twitter_handle",
+            "telegram_handle",
+            "email"
+          ],
+          "title": "SubmitUserDataRequest"
+        },
+        "TwitterFlowVerification": {
+          "properties": {
+            "verified": {
+              "type": "boolean",
+              "title": "Verified"
+            }
+          },
+          "type": "object",
+          "required": [
+            "verified"
+          ],
+          "title": "TwitterFlowVerification"
+        },
+        "ValidationError": {
+          "properties": {
+            "loc": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "array",
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            }
+          },
+          "type": "object",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "title": "ValidationError"
+        },
+        "WalletPoints": {
+          "properties": {
+            "wallet": {
+              "type": "string",
+              "title": "Wallet"
+            },
+            "points": {
+              "type": "number",
+              "title": "Points"
+            }
+          },
+          "type": "object",
+          "required": [
+            "wallet",
+            "points"
+          ],
+          "title": "WalletPoints"
         }
-      }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
       }
     }
   }
-}

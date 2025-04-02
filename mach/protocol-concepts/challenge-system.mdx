@@ -1,0 +1,42 @@
+---
+title: "Challenge System"
+description: "Security mechanism ensuring safe cross-chain transactions"
+---
+
+# Challenge System
+
+The challenge process is a critical security mechanism in the Mach protocol, ensuring the integrity and safety of cross-chain transactions by addressing discrepancies between different blockchains. This serves as a safeguard against errors, fraud, or any inconsistencies that might arise during the transaction process.
+
+## How the Challenge Process Works
+
+When a proposed match is made, the protocol processes it optimistically, meaning it proceeds before the transaction is fully settled on both chains. This approach requires an extra layer of security to address any potential issues.
+
+![Challenge System Overview](https://docs.mach.exchange/~gitbook/image?url=https%3A%2F%2F2022487005-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FBAHWbUztTgbMK2A8fqqv%252Fuploads%252FLqht1bdJa0FOagPBE2MK%252Fimage.png%3Falt%3Dmedia%26token%3Db2117c49-b3b1-4769-a848-69f5204eefff&width=768&dpr=4&quality=100&sign=933de645&sv=2)
+
+The challenge system, powered by LayerZero, automatically monitors transactions for discrepancies. 
+
+### Detection and Response
+
+If an issue is detected, the system takes immediate action:
+
+1. **Issue Detection**: The system identifies a potential problem with a transaction.
+2. **Process Locking**: All processes are locked to prevent any further actions.
+3. **Challenge Initiation**: A challenge is immediately initiated.
+
+![Challenge Initiation](https://docs.mach.exchange/~gitbook/image?url=https%3A%2F%2F2022487005-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FBAHWbUztTgbMK2A8fqqv%252Fuploads%252FfYa1MITrMHgFvBhYy7il%252Fimage.png%3Falt%3Dmedia%26token%3D908c5499-82d1-4da0-ad8e-1720578e2e99&width=768&dpr=4&quality=100&sign=6001572c&sv=2)
+
+### Verification Process
+
+During a challenge, funds are temporarily frozen to prevent any further actions until the issue is resolved:
+
+1. **Cross-Chain Verification**: A LayerZero transaction is sent to the destination chain to verify the existence of the order.
+2. **Order Validation**: The system checks if the challenged order is present and valid on the destination chain.
+
+### Resolution
+
+Once the verification is complete and the challenge is resolved, the funds are either released or reallocated based on the outcome:
+
+1. **Validated Orders**: If the order is validated, the frozen funds are made available for the intended transaction.
+2. **Invalid Orders**: If the order is found to be invalid, the funds are returned to the original sender.
+
+This robust challenge system ensures that all transactions on the Mach protocol are secure, reliable, and consistent across different blockchain networks, providing users with confidence in the integrity of their cross-chain transactions.

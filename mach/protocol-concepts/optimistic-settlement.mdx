@@ -1,0 +1,39 @@
+---
+title: "Optimistic Settlement"
+description: "Fast and secure cross-chain transaction processing"
+---
+
+# Optimistic Settlement
+
+**Optimistic Settlement** is a blockchain mechanism that makes transactions faster and cheaper by settling transactions off-chain while posting the transaction data on-chain. Instead of checking every transaction immediately, the system processes them quickly and only performs verification if there's a dispute.
+
+![Optimistic Settlement Process](https://docs.mach.exchange/~gitbook/image?url=https%3A%2F%2F2022487005-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FBAHWbUztTgbMK2A8fqqv%252Fuploads%252FUB49Z6EdbAEdEqFvg8UI%252Fimage.png%3Falt%3Dmedia%26token%3Df130fb2e-f0ac-4bf1-aa8f-dfa3ac7d6012&width=768&dpr=4&quality=100&sign=d3320346&sv=2)
+
+## How It Works in Mach
+
+In Mach, the term "optimistic" refers to the smart contract processing a proposed match before the transaction has been fully settled on both chains. This approach significantly speeds up transaction processing while maintaining security.
+
+Key aspects of Mach's optimistic settlement:
+
+1. **User Safety**: No risk is taken on by the user
+2. **Multiple Security Layers**: Active security measures combined with an extra layer of insurance from Mach and market-makers
+3. **Challenge Mechanism**: If something goes wrong with a trade, the system will challenge the match to protect users from any potential loss of funds
+4. **LayerZero Integration**: The challenge mechanism is powered by LayerZero, which automatically freezes funds and sends messages to check if there are issues on either chain
+
+## Benefits
+
+- **Speed**: Transactions complete much faster than traditional cross-chain methods
+- **Cost Efficiency**: Lower gas fees and operational costs
+- **Security**: Robust protection through the challenge system
+- **Simplicity**: Users experience a seamless transaction process without seeing the complex security mechanisms at work
+
+## Security Guarantees
+
+While optimistic in nature, the system is designed with multiple safeguards:
+
+1. **Automatic Monitoring**: Continuous observation of transactions for any discrepancies
+2. **Instant Response**: Immediate action if issues are detected
+3. **Fund Protection**: Temporary freezing of funds during challenges to prevent loss
+4. **Cross-Chain Verification**: LayerZero messaging to confirm transaction validity across chains
+
+For more detailed information about how issues are handled, see the [Challenge System](/mach/protocol-concepts/challenge-system) documentation.

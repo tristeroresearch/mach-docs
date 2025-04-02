@@ -1,0 +1,61 @@
+---
+title: 'Submit User Data'
+api: 'POST /v1/twitter/submit_user_data'
+description: 'Submits user data for Twitter integration'
+---
+
+This endpoint allows users to submit their contact information for Twitter integration, marketing communications, and rewards programs.
+
+## Request Body
+
+<ParamField body="wallet" type="string" required>
+  The wallet address of the user
+</ParamField>
+
+<ParamField body="twitter_handle" type="string" required>
+  The Twitter handle
+</ParamField>
+
+<ParamField body="telegram_handle" type="string">
+  (Optional) The Telegram handle
+</ParamField>
+
+<ParamField body="email" type="string">
+  (Optional) The user's email
+</ParamField>
+
+## Response
+
+<ResponseField name="verified" type="boolean">
+  Whether the submission was verified and processed successfully
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request POST \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/twitter/submit_user_data' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "wallet": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+    "twitter_handle": "user123",
+    "telegram_handle": "user123",
+    "email": "user@example.com"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "verified": true
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - User data submitted successfully |
+| 422 | Validation Error - Invalid parameters |
+| 500 | Internal Server Error - Something went wrong on the server |

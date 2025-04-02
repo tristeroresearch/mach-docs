@@ -1,0 +1,265 @@
+---
+title: 'Request Quote'
+api: 'POST /v1/quotes'
+description: 'Returns a price quote for a cross-chain swap'
+---
+
+This endpoint provides a price quote for a cross-chain token swap based on the provided parameters. The quote includes the expected destination amount, fees, and other order details.
+
+## Request Body
+
+<ParamField body="wallet_address" type="string">
+  User's wallet address (optional, defaults to zero address)
+</ParamField>
+
+<ParamField body="target_address" type="string">
+  Optional recipient address if different from wallet
+</ParamField>
+
+<ParamField body="src_chain" type="string" required>
+  Source chain identifier (e.g., "avalanche", "arbitrum")
+</ParamField>
+
+<ParamField body="dst_chain" type="string" required>
+  Destination chain identifier
+</ParamField>
+
+<ParamField body="src_asset_address" type="string" required>
+  Source token contract address
+</ParamField>
+
+<ParamField body="dst_asset_address" type="string" required>
+  Destination token contract address
+</ParamField>
+
+<ParamField body="src_amount" type="integer" required>
+  Amount to swap in the smallest unit of the source token
+</ParamField>
+
+## Response
+
+<ResponseField name="wallet_address" type="string">
+  User's wallet address
+</ResponseField>
+
+<ResponseField name="src_chain" type="string">
+  Source chain identifier
+</ResponseField>
+
+<ResponseField name="dst_chain" type="string">
+  Destination chain identifier
+</ResponseField>
+
+<ResponseField name="src_amount" type="string">
+  Amount being swapped in the smallest unit
+</ResponseField>
+
+<ResponseField name="dst_amount" type="string">
+  Amount to be received in the smallest unit
+</ResponseField>
+
+<ResponseField name="bond_amount" type="string">
+  Bond amount required for the swap
+</ResponseField>
+
+<ResponseField name="bond_fee" type="integer">
+  Fee for the bond
+</ResponseField>
+
+<ResponseField name="src_asset_address" type="string">
+  Source token contract address
+</ResponseField>
+
+<ResponseField name="dst_asset_address" type="string">
+  Destination token contract address
+</ResponseField>
+
+<ResponseField name="bond_asset_address" type="string">
+  Token address used for bonding
+</ResponseField>
+
+<ResponseField name="challenge_offset" type="integer">
+  Challenge offset time in seconds
+</ResponseField>
+
+<ResponseField name="challenge_window" type="integer">
+  Challenge window time in seconds
+</ResponseField>
+
+<ResponseField name="invalid_amount" type="boolean">
+  Whether the provided amount is invalid
+</ResponseField>
+
+<ResponseField name="liquidity_source" type="string">
+  Source of liquidity (e.g., "market_maker", "cctp_direct")
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Timestamp when the quote was created
+</ResponseField>
+
+<ResponseField name="expires_at" type="string">
+  Timestamp when the quote expires
+</ResponseField>
+
+<ResponseField name="order_data" type="object">
+  <Expandable title="Order Data">
+    <ResponseField name="contract_address" type="string">
+      Contract address for the order
+    </ResponseField>
+    <ResponseField name="order_direction" type="object">
+      <Expandable title="Order Direction">
+        <ResponseField name="src_token_address" type="string">
+          Source token address
+        </ResponseField>
+        <ResponseField name="dst_token_address" type="string">
+          Destination token address
+        </ResponseField>
+        <ResponseField name="src_lzc" type="integer">
+          Source LayerZero chain ID
+        </ResponseField>
+        <ResponseField name="dst_lzc" type="integer">
+          Destination LayerZero chain ID
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="order_funding" type="object">
+      <Expandable title="Order Funding">
+        <ResponseField name="src_amount_in" type="string">
+          Source amount
+        </ResponseField>
+        <ResponseField name="dst_amount_out" type="string">
+          Destination amount
+        </ResponseField>
+        <ResponseField name="bond_token_address" type="string">
+          Bond token address
+        </ResponseField>
+        <ResponseField name="bond_amount" type="string">
+          Bond amount
+        </ResponseField>
+        <ResponseField name="bond_fee" type="string">
+          Bond fee
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="order_expiration" type="object">
+      <Expandable title="Order Expiration">
+        <ResponseField name="timestamp" type="integer">
+          Expiration timestamp
+        </ResponseField>
+        <ResponseField name="challenge_offset" type="integer">
+          Challenge offset in seconds
+        </ResponseField>
+        <ResponseField name="challenge_window" type="integer">
+          Challenge window in seconds
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="target_address" type="string">
+      Target recipient address
+    </ResponseField>
+    <ResponseField name="filler_address" type="string">
+      Filler address
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="destination_transaction_fee" type="integer">
+  Fee for the destination transaction
+</ResponseField>
+
+<ResponseField name="destination_transaction_fee_usd" type="number">
+  USD value of the destination transaction fee
+</ResponseField>
+
+<ResponseField name="destination_transaction_fee_after_subsidy" type="integer">
+  Destination transaction fee after subsidy
+</ResponseField>
+
+<ResponseField name="destination_transaction_fee_after_subsidy_usd" type="number">
+  USD value of the destination transaction fee after subsidy
+</ResponseField>
+
+<ResponseField name="destination_transaction_fee_subsidy_usd" type="number">
+  USD value of the subsidy
+</ResponseField>
+
+<ResponseField name="reject_order" type="boolean">
+  Whether the order should be rejected
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request POST \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/quotes' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "wallet_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+    "src_chain": "avalanche",
+    "dst_chain": "arbitrum",
+    "src_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+    "dst_asset_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+    "src_amount": 1000000
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "wallet_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+  "src_chain": "avalanche",
+  "dst_chain": "arbitrum",
+  "src_amount": "1000000",
+  "dst_amount": "997000",
+  "bond_amount": "1500000",
+  "bond_fee": 3000,
+  "src_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+  "dst_asset_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+  "bond_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+  "challenge_offset": 900,
+  "challenge_window": 300,
+  "invalid_amount": false,
+  "liquidity_source": "market_maker",
+  "created_at": "2023-05-01T12:34:56Z",
+  "expires_at": "2023-05-01T12:39:56Z",
+  "order_data": {
+    "contract_address": "0x123...",
+    "order_direction": {
+      "src_token_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+      "dst_token_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+      "src_lzc": 30106,
+      "dst_lzc": 30110
+    },
+    "order_funding": {
+      "src_amount_in": "1000000",
+      "dst_amount_out": "997000",
+      "bond_token_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+      "bond_amount": "1500000",
+      "bond_fee": "3000"
+    },
+    "order_expiration": {
+      "timestamp": 1682944796,
+      "challenge_offset": 900,
+      "challenge_window": 300
+    },
+    "target_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+    "filler_address": "0x456..."
+  },
+  "destination_transaction_fee": 500000,
+  "destination_transaction_fee_usd": 0.50,
+  "destination_transaction_fee_after_subsidy": 100000,
+  "destination_transaction_fee_after_subsidy_usd": 0.10,
+  "destination_transaction_fee_subsidy_usd": 0.40,
+  "reject_order": false
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Quote returned successfully |
+| 422 | Validation Error - Invalid parameters |
+| 500 | Internal Server Error - Something went wrong on the server |

@@ -1,0 +1,138 @@
+---
+title: 'Get Configuration'
+api: 'GET /get_config'
+description: 'Returns chain and token configurations supported by Mach'
+---
+
+This endpoint returns a comprehensive JSON object that defines all supported chains and tokens in the Mach Exchange ecosystem. Use this configuration to set up your integration and access the necessary contract addresses and network details.
+
+## Request
+
+No parameters required.
+
+## Response
+
+<ResponseField name="chains" type="array">
+  <Expandable title="Chain Object">
+    <ResponseField name="id" type="string">
+      Chain identifier (e.g., "arbitrum", "optimism")
+    </ResponseField>
+    <ResponseField name="chainId" type="integer">
+      Numeric chain ID used in blockchain interactions
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Human-readable name of the chain
+    </ResponseField>
+    <ResponseField name="nativeToken" type="string">
+      Symbol of the native token (e.g., "ETH")
+    </ResponseField>
+    <ResponseField name="swapContract" type="string">
+      Address of the Mach swap contract on this chain
+    </ResponseField>
+    <ResponseField name="rpcUrl" type="string">
+      RPC endpoint URL for this chain
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="tokens" type="array">
+  <Expandable title="Token Object">
+    <ResponseField name="symbol" type="string">
+      Token symbol (e.g., "USDC")
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Full token name (e.g., "USD Coin")
+    </ResponseField>
+    <ResponseField name="decimals" type="integer">
+      Number of decimals for this token
+    </ResponseField>
+    <ResponseField name="addresses" type="object">
+      <Expandable title="Chain Address Mapping">
+        <ResponseField name="[chainId]" type="string">
+          Token contract address on the specified chain
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/get_config'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "chains": [
+    {
+      "id": "arbitrum",
+      "chainId": 42161,
+      "name": "Arbitrum One",
+      "nativeToken": "ETH",
+      "swapContract": "0xa27a2ca24dd28ce4b1493576dab585e965fe468a",
+      "rpcUrl": "https://arb1.arbitrum.io/rpc"
+    },
+    {
+      "id": "optimism",
+      "chainId": 10,
+      "name": "Optimism",
+      "nativeToken": "ETH",
+      "swapContract": "0x6f5f5296d06b9c9b34e9d70756945e197de31dbd",
+      "rpcUrl": "https://mainnet.optimism.io"
+    },
+    {
+      "id": "avalanche",
+      "chainId": 43114,
+      "name": "Avalanche",
+      "nativeToken": "AVAX",
+      "swapContract": "0x2c9dc6c8807c5c4370f5ed673ca40f9f9234a977",
+      "rpcUrl": "https://api.avax.network/ext/bc/C/rpc"
+    },
+    {
+      "id": "base",
+      "chainId": 8453,
+      "name": "Base",
+      "nativeToken": "ETH",
+      "swapContract": "0x36a1b513b82de68c965050b576759d21a5c1e0a9",
+      "rpcUrl": "https://mainnet.base.org"
+    },
+    {
+      "id": "solana",
+      "chainId": 1399811149,
+      "name": "Solana",
+      "nativeToken": "SOL",
+      "swapContract": "MSwpZSY7XwN8n9HtI3jfhyjCL9xjK1XnGDrTJBm8WUq",
+      "rpcUrl": "https://api.mainnet-beta.solana.com"
+    }
+  ],
+  "tokens": [
+    {
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6,
+      "addresses": {
+        "arbitrum": "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+        "optimism": "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+        "avalanche": "0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e",
+        "base": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "solana": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+      }
+    },
+    {
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6,
+      "addresses": {
+        "arbitrum": "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
+        "optimism": "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58",
+        "avalanche": "0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7",
+        "base": "0x50c5725949a6f0c72e6c4a641f24049a917db0cb"
+      }
+    }
+  ]
+}
+```
+</ResponseExample>

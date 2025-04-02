@@ -1,0 +1,359 @@
+---
+title: "Integrating Mach"
+description: "Guide for developers to integrate Mach Exchange into applications"
+---
+
+# Integrating Mach Exchange
+
+This guide provides step-by-step instructions for developers looking to integrate Mach Exchange's cross-chain swap functionality into their applications.
+
+## Overview
+
+Integrating with Mach Exchange allows your application to offer seamless cross-chain swaps with fast settlement times, competitive rates, and robust security. The integration process involves fetching configuration data, obtaining quotes, constructing transactions, and submitting orders.
+
+## Prerequisites
+
+- Basic understanding of blockchain development
+- Experience with JavaScript/TypeScript and React (for web applications)
+- Familiarity with Web3 libraries like ethers.js or web3.js
+- Access to blockchain node providers (like Infura or Alchemy)
+
+## Integration Steps
+
+### 1. Install Dependencies
+
+For a web application using ethers.js:
+
+```bash
+npm install ethers @mach-exchange/sdk
+# or
+yarn add ethers @mach-exchange/sdk
+```
+
+### 2. Initialize the Mach SDK
+
+```javascript
+import { MachSDK } from '@mach-exchange/sdk';
+import { ethers } from 'ethers';
+
+// Initialize provider
+const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+// Initialize Mach SDK
+const machSDK = new MachSDK({
+  provider,
+  apiEndpoint: 'https://mach-prod-536329393577.asia-northeast1.run.app'
+});
+```
+
+### 3. Fetch Mach Configuration
+
+Before presenting swap options to users, fetch the current configuration to get supported chains and tokens:
+
+```javascript
+async function fetchMachConfig() {
+  try {
+    const config = await machSDK.getConfig();
+    
+    // config.chains contains supported blockchain networks
+    // config.tokens contains supported tokens across chains
+    
+    return config;
+  } catch (error) {
+    console.error('Error fetching Mach config:', error);
+    throw error;
+  }
+}
+```
+
+### 4. Request a Quote
+
+When a user wants to perform a swap, request a quote to get current rates:
+
+```javascript
+async function getQuote(params) {
+  try {
+    const quote = await machSDK.getQuote({
+      wallet_address: params.walletAddress,
+      src_chain: params.sourceChain,
+      dst_chain: params.destinationChain,
+      src_asset_address: params.sourceTokenAddress,
+      dst_asset_address: params.destinationTokenAddress,
+      src_amount: params.amount
+    });
+    
+    return quote;
+  } catch (error) {
+    console.error('Error getting quote:', error);
+    throw error;
+  }
+}
+```
+
+### 5. Execute a Swap
+
+Once the user approves a quote, execute the swap:
+
+```javascript
+async function executeSwap(quote) {
+  try {
+    // 1. Connect to user's wallet
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+    
+    // 2. Get the contract and prepare transaction
+    const swapContract = new ethers.Contract(
+      quote.order_data.contract_address,
+      MachABI, // Import from SDK
+      signer
+    );
+    
+    // 3. Check if token approval is needed
+    const sourceToken = new ethers.Contract(
+      quote.src_asset_address,
+      ERC20ABI, // Standard ERC20 ABI
+      signer
+    );
+    
+    const allowance = await sourceToken.allowance(
+      await signer.getAddress(),
+      quote.order_data.contract_address
+    );
+    
+    // 4. Approve token if needed
+    if (allowance.lt(quote.src_amount)) {
+      const approveTx = await sourceToken.approve(
+        quote.order_data.contract_address,
+        ethers.constants.MaxUint256
+      );
+      await approveTx.wait();
+    }
+    
+    // 5. Execute the swap
+    const swapTx = await swapContract.placeTrade(
+      quote.order_data.order_direction,
+      quote.order_data.order_funding,
+      quote.order_data.order_expiration,
+      quote.order_data.target_address,
+      quote.order_data.filler_address
+    );
+    
+    // 6. Wait for transaction confirmation
+    const receipt = await swapTx.wait();
+    
+    // 7. Submit the order to Mach API
+    const orderResponse = await machSDK.submitOrder({
+      chain: quote.src_chain,
+      place_taker_tx: receipt.transactionHash
+    });
+    
+    return orderResponse;
+  } catch (error) {
+    console.error('Error executing swap:', error);
+    throw error;
+  }
+}
+```
+
+### 6. Monitor Order Status
+
+After submitting an order, allow users to track its status:
+
+```javascript
+async function checkOrderStatus(orderId) {
+  try {
+    const orderStatus = await machSDK.getOrderStatus(orderId);
+    return orderStatus;
+  } catch (error) {
+    console.error('Error checking order status:', error);
+    throw error;
+  }
+}
+```
+
+## UI Integration Example
+
+Here's a simplified React component for a swap interface:
+
+```jsx
+import React, { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
+import { MachSDK } from '@mach-exchange/sdk';
+
+function SwapInterface() {
+  const [chains, setChains] = useState([]);
+  const [tokens, setTokens] = useState([]);
+  const [sourceChain, setSourceChain] = useState('');
+  const [destChain, setDestChain] = useState('');
+  const [sourceToken, setSourceToken] = useState('');
+  const [destToken, setDestToken] = useState('');
+  const [amount, setAmount] = useState('');
+  const [quote, setQuote] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [orderStatus, setOrderStatus] = useState(null);
+  
+  // Initialize SDK
+  const machSDK = new MachSDK({
+    provider: new ethers.providers.Web3Provider(window.ethereum),
+    apiEndpoint: 'https://mach-prod-536329393577.asia-northeast1.run.app'
+  });
+  
+  // Fetch config on load
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const config = await machSDK.getConfig();
+        setChains(config.chains);
+        setTokens(config.tokens);
+      } catch (error) {
+        console.error('Error loading config:', error);
+      }
+    }
+    
+    loadConfig();
+  }, []);
+  
+  // Get quote when user inputs change
+  async function handleGetQuote() {
+    if (!sourceChain || !destChain || !sourceToken || !destToken || !amount) {
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const walletAddress = accounts[0];
+      
+      const quote = await machSDK.getQuote({
+        wallet_address: walletAddress,
+        src_chain: sourceChain,
+        dst_chain: destChain,
+        src_asset_address: sourceToken,
+        dst_asset_address: destToken,
+        src_amount: ethers.utils.parseUnits(amount, 6).toString() // Assuming 6 decimals
+      });
+      
+      setQuote(quote);
+    } catch (error) {
+      console.error('Error getting quote:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+  
+  // Execute swap
+  async function handleSwap() {
+    if (!quote) return;
+    
+    setLoading(true);
+    
+    try {
+      const order = await executeSwap(quote);
+      setOrderStatus(order);
+    } catch (error) {
+      console.error('Error executing swap:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+  
+  return (
+    <div className="swap-interface">
+      <h2>Cross-Chain Swap</h2>
+      
+      <div className="form-group">
+        <label>Source Chain</label>
+        <select value={sourceChain} onChange={e => setSourceChain(e.target.value)}>
+          <option value="">Select Source Chain</option>
+          {chains.map(chain => (
+            <option key={chain.id} value={chain.id}>{chain.name}</option>
+          ))}
+        </select>
+      </div>
+      
+      <div className="form-group">
+        <label>Destination Chain</label>
+        <select value={destChain} onChange={e => setDestChain(e.target.value)}>
+          <option value="">Select Destination Chain</option>
+          {chains.map(chain => (
+            <option key={chain.id} value={chain.id}>{chain.name}</option>
+          ))}
+        </select>
+      </div>
+      
+      {/* Token selectors and amount input would go here */}
+      
+      <button onClick={handleGetQuote} disabled={loading}>
+        Get Quote
+      </button>
+      
+      {quote && (
+        <div className="quote-details">
+          <h3>Quote Details</h3>
+          <p>You Send: {ethers.utils.formatUnits(quote.src_amount, 6)} {quote.src_token_symbol}</p>
+          <p>You Receive: {ethers.utils.formatUnits(quote.dst_amount, 6)} {quote.dst_token_symbol}</p>
+          <p>Rate: 1 {quote.src_token_symbol} = {(Number(quote.dst_amount) / Number(quote.src_amount)).toFixed(6)} {quote.dst_token_symbol}</p>
+          
+          <button onClick={handleSwap} disabled={loading}>
+            Swap Now
+          </button>
+        </div>
+      )}
+      
+      {orderStatus && (
+        <div className="order-status">
+          <h3>Order Status</h3>
+          <p>Order ID: {orderStatus.id}</p>
+          <p>Status: {orderStatus.completed ? 'Completed' : 'Pending'}</p>
+          {/* Additional status details */}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default SwapInterface;
+```
+
+## Testing Your Integration
+
+Before deploying to production, test your integration thoroughly:
+
+1. Start with testnet integrations to validate your implementation
+2. Test with small amounts on mainnet before handling larger transactions
+3. Verify that error handling is robust and user-friendly
+4. Test the entire flow from quote to swap completion
+5. Monitor order status and ensure proper feedback to users
+
+## Advanced Integration Features
+
+### Referral Programs
+
+Include referral codes when submitting orders to participate in Mach's referral program:
+
+```javascript
+const orderResponse = await machSDK.submitOrder({
+  chain: quote.src_chain,
+  place_taker_tx: receipt.transactionHash,
+  referral_code: 'YOUR_REFERRAL_CODE'
+});
+```
+
+### Gas Estimation
+
+Provide users with gas estimates before they proceed with a transaction:
+
+```javascript
+const gasEstimate = await machSDK.getGasEstimate(sourceChain);
+console.log(`Estimated gas: ${gasEstimate.gas_estimate} units at ${ethers.utils.formatUnits(gasEstimate.gas_price, 'gwei')} gwei`);
+```
+
+## Resources
+
+- [API Reference](/api-reference/integration-endpoints)
+- [Smart Contract Documentation](/mach/protocol-concepts/cross-chain-swaps)
+- [GitHub Repository](https://github.com/mach-exchange/sdk)
+- [Developer Discord](https://discord.gg/mach-exchange)
+
+By following this guide, you should be able to successfully integrate Mach Exchange's cross-chain swap functionality into your application, providing your users with a seamless and efficient trading experience across multiple blockchain networks.

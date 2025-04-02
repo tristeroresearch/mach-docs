@@ -1,0 +1,55 @@
+---
+title: 'Get All Points'
+api: 'GET /v1/points'
+description: 'Returns the top wallets by points'
+---
+
+This endpoint retrieves a list of the top wallets by points earned on Mach Exchange. The results can be limited to a specific number of wallets.
+
+## Query Parameters
+
+<ParamField query="limit" type="integer">
+  (Optional) Number of top wallets to return (default: 10, max: 100)
+</ParamField>
+
+## Response
+
+An array of wallet point objects, each containing:
+
+<ResponseField name="wallet" type="string">
+  Wallet address
+</ResponseField>
+
+<ResponseField name="points" type="number">
+  Number of points earned by the wallet
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/points?limit=10'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+[
+  {
+    "wallet": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+    "points": 1500
+  },
+  {
+    "wallet": "0xa10094DFede30AbEe3a8d549BbA828b6fd771107",
+    "points": 1200
+  }
+]
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Points list returned successfully |
+| 422 | Validation Error - Invalid limit parameter |
+| 500 | Internal Server Error - Something went wrong on the server |

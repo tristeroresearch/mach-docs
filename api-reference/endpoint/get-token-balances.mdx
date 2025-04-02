@@ -1,0 +1,64 @@
+---
+title: 'Get Token Balances'
+api: 'GET /tokenBalances'
+description: 'Returns token balances for a wallet address'
+---
+
+This endpoint retrieves the token balances for a specified wallet address across supported chains.
+
+## Query Parameters
+
+<ParamField query="wallet_address" type="string" required>
+  Wallet address (supports Ethereum and Solana addresses)
+</ParamField>
+
+## Response
+
+The response includes a list of token balances for the specified wallet address, grouped by blockchain.
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/tokenBalances?wallet_address=0x886431aee6486D68863D2963F3E7BC8683990210'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "ethereum": [
+    {
+      "symbol": "ETH",
+      "balance": "0.145",
+      "usd_value": "254.75",
+      "address": "0x0000000000000000000000000000000000000000",
+      "decimals": 18
+    },
+    {
+      "symbol": "USDC",
+      "balance": "125.5",
+      "usd_value": "125.5",
+      "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "decimals": 6
+    }
+  ],
+  "arbitrum": [
+    {
+      "symbol": "ARB",
+      "balance": "50",
+      "usd_value": "60",
+      "address": "0x912ce59144191c1204e64559fe8253a0e49e6548",
+      "decimals": 18
+    }
+  ]
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Token balances returned successfully |
+| 422 | Validation Error - Invalid wallet address format |
+| 500 | Internal Server Error - Something went wrong on the server |

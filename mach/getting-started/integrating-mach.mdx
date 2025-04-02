@@ -1,0 +1,279 @@
+---
+title: "Integrating Mach"
+description: "Guide for integrating Mach into your applications"
+---
+
+# Integrating Mach
+
+Mach provides a seamless integration experience for developers looking to add cross-chain swaps to their applications. This guide will walk you through the process of integrating Mach into your application.
+
+## Integration Overview
+
+Integrating Mach into your application involves three primary steps:
+
+1. **Smart Contract Integration**: Interact with Mach's smart contracts to place trades
+2. **API Integration**: Use Mach's API to fetch quotes, submit orders, and track order status
+3. **UI Integration**: Provide a user interface for your users to interact with Mach
+
+## Smart Contract Integration
+
+### Step 1: Load Contracts and Approve Token Spend
+
+Before placing a trade, you'll need to:
+- Load the token contract addresses for the tokens the user wants to swap
+- Load the Mach swap contract on the source chain
+- Ensure the user has approved the Mach contract to spend their tokens
+
+```typescript
+// Check and approve the sell-side token spend
+async function checkAndApproveAllowance(wallet: ethers.Wallet, tokenAddress: string, spenderAddress: string, amount: BigNumber) {
+  const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, wallet);
+  const allowance = await tokenContract.allowance(wallet.address, spenderAddress);
+  
+  if (allowance.lt(amount)) {
+    const tx = await tokenContract.approve(spenderAddress, ethers.constants.MaxUint256);
+    await tx.wait();
+    return true;
+  }
+  return false;
+}
+
+// Load the Mach swap contract
+function getSwapContract(wallet: ethers.Wallet, contractAddress: string) {
+  return new ethers.Contract(contractAddress, MACH_SWAP_ABI, wallet);
+}
+```
+
+### Step 2: Place a Trade
+
+Execute the `placeTrade` function on the Mach swap contract to place an order:
+
+```typescript
+async function placeTrade(
+  swapContract: ethers.Contract,
+  sourceToken: string,
+  destinationToken: string,
+  destinationChain: string,
+  amount: BigNumber,
+  destinationAddress: string
+) {
+  const transactionFunctionArgs = [
+    sourceToken,            // Source token address
+    destinationToken,       // Destination token address
+    destinationChain,       // Destination chain ID or name
+    amount,                 // Amount to swap (in source token's smallest unit)
+    destinationAddress      // Address to receive tokens on destination chain
+  ];
+
+  // Execute the swap transaction
+  const tx = await swapContract.placeTrade(...transactionFunctionArgs);
+  return await tx.wait();
+}
+```
+
+### Step 3: Extract Order Information
+
+After the transaction is confirmed, extract the order information from the transaction receipt:
+
+```typescript
+async function getOrderFromReceipt(receipt: TransactionReceipt, swapContract: ethers.Contract) {
+  const orderPlacedEvent = receipt.logs
+    .map(log => {
+      try {
+        return swapContract.interface.parseLog(log);
+      } catch (e) {
+        return null;
+      }
+    })
+    .filter(event => event !== null && event.name === 'OrderPlaced')[0];
+  
+  if (!orderPlacedEvent) {
+    throw new Error('OrderPlaced event not found in transaction receipt');
+  }
+  
+  return orderPlacedEvent.args;
+}
+```
+
+## API Integration
+
+After placing a trade on-chain, you'll need to notify Mach's API to fulfill the order.
+
+### Getting Quotes
+
+Before placing a trade, you can fetch a quote to show the user how much they'll receive:
+
+```typescript
+async function getQuote(params: {
+  walletAddress: string;
+  srcChain: string;
+  dstChain: string;
+  srcAssetAddress: string;
+  dstAssetAddress: string;
+  srcAmount: string;
+  targetAddress?: string;
+}) {
+  try {
+    // Map token addresses if needed (for cross-chain address mapping)
+    const srcAssetAddress = mapTokenAddress(params.srcAssetAddress, params.srcChain);
+    const dstAssetAddress = mapTokenAddress(params.dstAssetAddress, params.dstChain);
+
+    // Construct the query URL
+    const queryParams = new URLSearchParams({
+      src_chain: params.srcChain,
+      dst_chain: params.dstChain,
+      src_asset: srcAssetAddress,
+      dst_asset: dstAssetAddress,
+      amount: params.srcAmount,
+      wallet: getChecksumAddress(params.walletAddress),
+      ...(params.targetAddress && { target_address: params.targetAddress }),
+    });
+
+    // Determine which API endpoint to use based on whether the source chain is a testnet
+    const api = isTestnet(CHAIN_IDS[params.srcChain as ChainName]) 
+      ? cacheHalfFullTestnetApi 
+      : cacheHalfFullApi;
+
+    // Make the API request
+    const response = await api.get(`/v1/quote?${queryParams}`);
+    return response.data;
+  } catch (error) {
+    // Handle errors appropriately
+    console.error('Error getting quote:', error);
+    throw error;
+  }
+}
+```
+
+### Submitting Orders
+
+After a successful on-chain transaction, submit the order to Mach's API:
+
+```typescript
+async function apiSendOrderData(orderData: {
+  sellChain: string;
+  transactionHash: string;
+}, referralCode?: string, referrer?: string) {
+  // Remove spaces from sellChain
+  const sellChain = orderData.sellChain.replace(/\s+/g, '');
+  
+  const payload = {
+    chain: sellChain,
+    place_taker_tx: orderData.transactionHash,
+    referral_code: referralCode,
+    referrer,
+  };
+
+  try {
+    // Determine which API to use based on chain type
+    const api = !isTestnet(CHAIN_IDS[payload.chain as ChainName])
+      ? cacheHalfFullApi
+      : cacheHalfFullTestnetApi;
+
+    const response = await api.post('/v1/orders', payload);
+    
+    // Handle response based on status code
+    switch (Number(response.status)) {
+      case 200:
+        return {
+          message: 'Order successfully sent.',
+          status: 'pending',
+          eta: response.data.eta,
+          id: response.data.id,
+        };
+      case 202:
+        return {
+          message: 'Order accepted but will take 5-20 minutes to find a match.',
+          status: 'pending',
+          eta: response.data.eta,
+        };
+      case 400:
+        return {
+          message: 'Order will not be filled by the market maker at this time.',
+          status: 'failure',
+          errorobj: response.data,
+        };
+      // Handle other status codes...
+      default:
+        return {
+          message: 'Unexpected error occurred.',
+          status: 'failure',
+          errorobj: response.data,
+        };
+    }
+  } catch (error) {
+    // Handle errors appropriately
+    return {
+      message: getErrorMessage(error),
+      status: 'failure',
+      errorobj: error,
+    };
+  }
+}
+```
+
+### Tracking Order Status
+
+To allow users to track their orders:
+
+```typescript
+async function getOrderHistory(address: string) {
+  const endpoint = `/v1/orders?wallet=${address}`;
+  const apiCalls = [cacheHalfFullApi.get(endpoint)];
+  
+  // If testnet is enabled, also fetch from testnet API
+  if (isFeatureEnabled('USE_TESTNETS_ONLY') || isFeatureEnabled('ENABLE_TESTNETS')) {
+    apiCalls.push(cacheHalfFullTestnetApi.get(endpoint));
+  }
+
+  const [mainnetResult, testnetResult] = await Promise.allSettled(apiCalls);
+  
+  let orders = [];
+  
+  // Process mainnet orders
+  if (mainnetResult && mainnetResult.status === 'fulfilled') {
+    orders = orders.concat(mainnetResult.value.data);
+  }
+  
+  // Process testnet orders
+  if (testnetResult && testnetResult.status === 'fulfilled') {
+    orders = orders.concat(testnetResult.value.data);
+  }
+  
+  // Deduplicate orders
+  return Array.from(new Map(orders.map(order => [order.id, order])).values());
+}
+```
+
+## Multi-Chain Support
+
+Mach supports multiple blockchain ecosystems:
+
+- **EVM Chains**: Ethereum, Arbitrum, Optimism, Base, and more
+- **Solana**: SVM ecosystem
+- **Tron**: Tron blockchain
+
+When integrating, be sure to properly handle chain-specific requirements and address formats.
+
+## UI Integration Best Practices
+
+When adding Mach to your user interface:
+
+1. **Chain Selection**: Allow users to select source and destination chains
+2. **Token Selection**: Provide a dropdown of supported tokens for each chain
+3. **Quote Display**: Show the expected amount the user will receive, including fees
+4. **Order Tracking**: Provide a way for users to track their orders
+5. **Chain Indicators**: Consider using small chain badges/icons to clearly indicate which chain tokens belong to (similar to the WalletPortfolioDrawer pattern)
+
+## Complete Integration Example
+
+A complete example of integrating Mach would include:
+
+1. Fetching supported chains and tokens from the Mach API
+2. Allowing users to select source and destination chains/tokens
+3. Getting a quote for the requested swap
+4. Approving token spend and placing the trade on-chain
+5. Submitting the trade to the Mach API for fulfillment
+6. Tracking the order status and showing the result to the user
+
+For more detailed examples and the complete API reference, refer to our [API Documentation](/api-reference/introduction).

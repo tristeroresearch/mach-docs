@@ -1,0 +1,702 @@
+---
+title: 'Selected API Endpoints for Integrations'
+description: 'Key API endpoints for integrating with Mach Exchange'
+---
+
+# Selected API Endpoints for Integrations
+
+Full documentation with API explorer is available at [Mach API Explorer](https://mach-prod-536329393577.asia-northeast1.run.app/docs).
+
+## Ingesting Mach Config
+
+### Get Configuration
+
+<Card title="/get_config" icon="code" iconType="solid">
+  **Method:** GET
+  
+  Returns a JSON object that defines the chains and tokens that Mach supports. All chain IDs, token contracts, swap contracts and necessary information for routing transactions to Mach can be retrieved from this endpoint.
+</Card>
+
+This endpoint is essential for any integration as it provides all the necessary contract addresses, token details, and chain information required to interact with the Mach protocol.
+
+#### Response Format
+
+```json
+{
+  "chains": [
+    {
+      "id": "arbitrum",
+      "chainId": 42161,
+      "name": "Arbitrum One",
+      "nativeToken": "ETH",
+      "swapContract": "0x...",
+      "rpcUrl": "https://arb1.arbitrum.io/rpc"
+    },
+    // Other supported chains
+  ],
+  "tokens": [
+    {
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6,
+      "addresses": {
+        "arbitrum": "0x...",
+        "optimism": "0x...",
+        // Other chains
+      }
+    },
+    // Other supported tokens
+  ]
+}
+```
+
+## Gas Estimation
+
+### Get Gas Estimate 
+
+<Card title="/v1/orders/gas" icon="gas-pump" iconType="solid">
+  **Method:** GET
+  
+  Estimates the gas price on the given chain.
+</Card>
+
+#### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chain | string | Chain identifier (e.g., "avalanche", "ethereum") |
+
+#### Example Request
+
+```
+GET https://mach-prod-536329393577.asia-northeast1.run.app/v1/orders/gas?chain=avalanche
+```
+
+#### Example Response
+
+```json
+{
+  "gas_estimate": 21000,
+  "gas_price": 25000000000
+}
+```
+
+## Quote Endpoints
+
+### Request Quote
+
+<Card title="/v1/quotes" icon="dollar-sign" iconType="solid">
+  **Method:** POST
+  
+  Returns a price quote for a cross-chain swap based on the provided parameters.
+</Card>
+
+#### Request Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| wallet_address | string | User's wallet address (optional, defaults to zero address) |
+| target_address | string | Optional recipient address if different from wallet |
+| src_chain | string | Source chain identifier (e.g., "arbitrum", "optimism") |
+| dst_chain | string | Destination chain identifier |
+| src_asset_address | string | Source token contract address |
+| dst_asset_address | string | Destination token contract address |
+| src_amount | integer | Amount to swap in the smallest unit of the source token |
+
+#### Example Request
+
+```json
+POST https://mach-prod-536329393577.asia-northeast1.run.app/v1/quotes
+Content-Type: application/json
+
+{
+  "wallet_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+  "src_chain": "avalanche",
+  "dst_chain": "arbitrum",
+  "src_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+  "dst_asset_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+  "src_amount": 1000000
+}
+```
+
+#### Response Format
+
+```json
+{
+  "wallet_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+  "src_chain": "avalanche",
+  "dst_chain": "arbitrum",
+  "src_amount": "1000000",
+  "dst_amount": "997000",
+  "bond_amount": "1500000",
+  "bond_fee": 3000,
+  "src_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+  "dst_asset_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+  "bond_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+  "challenge_offset": 900,
+  "challenge_window": 300,
+  "invalid_amount": false,
+  "liquidity_source": "market_maker",
+  "created_at": "2023-05-01T12:34:56Z",
+  "expires_at": "2023-05-01T12:39:56Z",
+  "order_data": {
+    "contract_address": "0x123...",
+    "order_direction": {
+      "src_token_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+      "dst_token_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+      "src_lzc": 30106,
+      "dst_lzc": 30110
+    },
+    "order_funding": {
+      "src_amount_in": "1000000",
+      "dst_amount_out": "997000",
+      "bond_token_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+      "bond_amount": "1500000",
+      "bond_fee": "3000"
+    },
+    "order_expiration": {
+      "timestamp": 1682944796,
+      "challenge_offset": 900,
+      "challenge_window": 300
+    },
+    "target_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+    "filler_address": "0x456..."
+  },
+  "destination_transaction_fee": 500000,
+  "destination_transaction_fee_usd": 0.50,
+  "destination_transaction_fee_after_subsidy": 100000,
+  "destination_transaction_fee_after_subsidy_usd": 0.10,
+  "destination_transaction_fee_subsidy_usd": 0.40,
+  "reject_order": false
+}
+```
+
+## Order Endpoints
+
+### Submit Order
+
+<Card title="/v1/orders" icon="bolt" iconType="solid">
+  **Method:** POST
+  
+  After receiving a confirmed transaction calling the PlaceTrade function on our Optimistic Swap smart contract, you can send the transaction data to our service to fulfill the order for the user.
+</Card>
+
+#### Request Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chain | string | The chain where the transaction was submitted |
+| place_taker_tx | string | The transaction hash of the PlaceTrade call |
+| referral_code | string | Optional referral code |
+
+#### Example Request
+
+```json
+POST https://mach-prod-536329393577.asia-northeast1.run.app/v1/orders
+Content-Type: application/json
+
+{
+  "chain": "optimism",
+  "place_taker_tx": "0x50da55b159ccd423ebcb315dd2949202e584473960008274514c5088f3d26de7",
+  "referral_code": "ABC"
+}
+```
+
+#### Example Response
+
+```json
+{
+  "id": "6368f169-d9ad-53ec-b797-81b4dc74c257",
+  "taker_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+  "maker_address": "0x123456789abcdef123456789abcdef123456789a",
+  "src_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+  "dst_asset_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+  "src_chain": "avalanche",
+  "dst_chain": "arbitrum",
+  "src_amount": 1000000,
+  "dst_amount": 997000,
+  "created_at": "2023-05-01T12:34:56Z",
+  "filled_at": "2023-05-01T12:35:30Z",
+  "expires_at": "2023-05-01T12:39:56Z",
+  "completed": true,
+  "place_tx": "0x50da55b159ccd423ebcb315dd2949202e584473960008274514c5088f3d26de7",
+  "fill_tx": "0x60ea66b269ccd423ebcb315dd2949202e584473960008274514c5088f3d26ff8",
+  "eta": 0,
+  "order_type": "default"
+}
+```
+
+### Get User Orders
+
+<Card title="/v1/orders" icon="list" iconType="solid">
+  **Method:** GET
+  
+  Retrieve orders that were submitted by a wallet.
+</Card>
+
+#### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| wallet | string | The wallet address to retrieve orders for |
+
+#### Example Request
+
+```
+GET https://mach-prod-536329393577.asia-northeast1.run.app/v1/orders?wallet=0xb20094DFede30AbEe3a8d549BbA828b6fd771106
+```
+
+#### Example Response
+
+```json
+[
+  {
+    "id": "6368f169-d9ad-53ec-b797-81b4dc74c257",
+    "taker_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+    "maker_address": "0x123456789abcdef123456789abcdef123456789a",
+    "src_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+    "dst_asset_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+    "src_chain": "avalanche",
+    "dst_chain": "arbitrum",
+    "src_amount": 1000000,
+    "dst_amount": 997000,
+    "created_at": "2023-05-01T12:34:56Z",
+    "filled_at": "2023-05-01T12:35:30Z",
+    "expires_at": "2023-05-01T12:39:56Z",
+    "completed": true,
+    "place_tx": "0x50da55b159ccd423ebcb315dd2949202e584473960008274514c5088f3d26de7",
+    "fill_tx": "0x60ea66b269ccd423ebcb315dd2949202e584473960008274514c5088f3d26ff8",
+    "eta": 0,
+    "order_type": "default"
+  },
+  // Additional orders...
+]
+```
+
+### Get Order Status
+
+<Card title="/v1/orders/{order_id}" icon="info-circle" iconType="solid">
+  **Method:** GET
+  
+  Retrieve the current status of an order.
+</Card>
+
+#### Path Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| order_id | string | The ID of the order to retrieve |
+
+#### Example Request
+
+```
+GET https://mach-prod-536329393577.asia-northeast1.run.app/v1/orders/6368f169-d9ad-53ec-b797-81b4dc74c257
+```
+
+#### Example Response
+
+```json
+{
+  "id": "6368f169-d9ad-53ec-b797-81b4dc74c257",
+  "taker_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+  "maker_address": "0x123456789abcdef123456789abcdef123456789a",
+  "src_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+  "dst_asset_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+  "src_chain": "avalanche",
+  "dst_chain": "arbitrum",
+  "src_amount": 1000000,
+  "dst_amount": 997000,
+  "created_at": "2023-05-01T12:34:56Z",
+  "filled_at": "2023-05-01T12:35:30Z",
+  "expires_at": "2023-05-01T12:39:56Z",
+  "completed": true,
+  "place_tx": "0x50da55b159ccd423ebcb315dd2949202e584473960008274514c5088f3d26de7",
+  "fill_tx": "0x60ea66b269ccd423ebcb315dd2949202e584473960008274514c5088f3d26ff8",
+  "eta": 0,
+  "order_type": "default"
+}
+```
+
+## CCTP Endpoints
+
+<Card title="/v1/orders/cctp" icon="exchange-alt" iconType="solid">
+  **Method:** POST
+  
+  Submit a Circle Cross-Chain Transfer Protocol (CCTP) transaction.
+</Card>
+
+#### Request Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chain | string | Source chain of the CCTP transaction |
+| burn_tx | string | Transaction hash of the CCTP burn transaction |
+| solana_token_owner_address | string | (Optional) Solana token owner address, if applicable |
+
+#### Example Request
+
+```json
+POST https://mach-prod-536329393577.asia-northeast1.run.app/v1/orders/cctp
+Content-Type: application/json
+
+{
+  "chain": "avalanche",
+  "burn_tx": "0x3cdc8d4da0e74b08f453f311e2031b2d518c769cc8d9b5783043a2e35a9e6428",
+  "solana_token_owner_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+}
+```
+
+#### Example Response
+
+```json
+{
+  "id": "6368f169-d9ad-53ec-b797-81b4dc74c257",
+  "taker_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+  "maker_address": null,
+  "src_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+  "dst_asset_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+  "src_chain": "avalanche",
+  "dst_chain": "arbitrum",
+  "src_amount": 1000000,
+  "dst_amount": 997000,
+  "created_at": "2023-05-01T12:34:56Z",
+  "filled_at": null,
+  "expires_at": null,
+  "completed": false,
+  "place_tx": "0x3cdc8d4da0e74b08f453f311e2031b2d518c769cc8d9b5783043a2e35a9e6428",
+  "fill_tx": null,
+  "eta": 300,
+  "order_type": "cctp"
+}
+```
+
+## Token Endpoints
+
+<Card title="/v1/tokens/token_info" icon="coins" iconType="solid">
+  **Method:** GET
+  
+  Fetches token information based on the provided blockchain chain and token address.
+</Card>
+
+#### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chain | string | Blockchain chain identifier |
+| token_address | string | Ethereum token contract address |
+
+#### Example Request
+
+```
+GET https://mach-prod-536329393577.asia-northeast1.run.app/v1/tokens/token_info?chain=arbitrum&token_address=0xff970a61a04b1ca14834a43f5de4533ebddb5cc8
+```
+
+#### Example Response
+
+```json
+{
+  "chain": "arbitrum",
+  "symbol": "USDC",
+  "address": "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+  "decimals": 6,
+  "usd_est": 1,
+  "is_wrapped": false,
+  "cex_tickers": {
+    "binance": "USDC"
+  },
+  "name": "USD Coin"
+}
+```
+
+<Card title="/v1/tokens/get_all_tokens_from_db" icon="database" iconType="solid">
+  **Method:** GET
+  
+  Fetches all tokens. If a chain is provided, it fetches tokens for that specific chain.
+</Card>
+
+#### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chain | string | (Optional) Blockchain chain identifier |
+
+#### Example Request
+
+```
+GET https://mach-prod-536329393577.asia-northeast1.run.app/v1/tokens/get_all_tokens_from_db?chain=arbitrum
+```
+
+#### Example Response
+
+```json
+[
+  {
+    "chain": "arbitrum",
+    "symbol": "USDC",
+    "address": "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+    "decimals": 6,
+    "usd_est": 1,
+    "is_wrapped": false,
+    "cex_tickers": {
+      "binance": "USDC"
+    },
+    "name": "USD Coin"
+  },
+  {
+    "chain": "arbitrum",
+    "symbol": "WETH",
+    "address": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+    "decimals": 18,
+    "usd_est": 3500,
+    "is_wrapped": true,
+    "cex_tickers": {
+      "binance": "ETH"
+    },
+    "name": "Wrapped Ether"
+  }
+  // Additional tokens...
+]
+```
+
+## Points Endpoints
+
+<Card title="/v1/points" icon="trophy" iconType="solid">
+  **Method:** GET
+  
+  Returns the top wallets by points.
+</Card>
+
+#### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| limit | integer | (Optional) Number of top wallets to return (default: 10, max: 100) |
+
+#### Example Request
+
+```
+GET https://mach-prod-536329393577.asia-northeast1.run.app/v1/points?limit=10
+```
+
+#### Example Response
+
+```json
+[
+  {
+    "wallet": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+    "points": 1500
+  },
+  {
+    "wallet": "0xa10094DFede30AbEe3a8d549BbA828b6fd771107",
+    "points": 1200
+  }
+  // Additional wallets...
+]
+```
+
+<Card title="/v1/points/{wallet}" icon="user-circle" iconType="solid">
+  **Method:** GET
+  
+  Returns points for a specific wallet address.
+</Card>
+
+#### Path Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| wallet | string | The wallet address to retrieve points for |
+
+#### Example Request
+
+```
+GET https://mach-prod-536329393577.asia-northeast1.run.app/v1/points/0xb20094DFede30AbEe3a8d549BbA828b6fd771106
+```
+
+#### Example Response
+
+```json
+{
+  "wallet": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+  "points": 1500
+}
+```
+
+<Card title="/v1/points/referral_code/{referral_code}" icon="users" iconType="solid">
+  **Method:** POST
+  
+  Gets information about a referral code.
+</Card>
+
+#### Path Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| referral_code | string | The referral code to look up |
+
+#### Example Request
+
+```
+POST https://mach-prod-536329393577.asia-northeast1.run.app/v1/points/referral_code/ABC
+```
+
+#### Example Response
+
+```json
+{
+  "code": "ABC",
+  "percentage": 10,
+  "referrer": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106"
+}
+```
+
+## Twitter Integration Endpoints
+
+<Card title="/v1/twitter/recent_tweet_id" icon="twitter" iconType="solid">
+  **Method:** GET
+  
+  Returns the ID of the most recent tweet for Twitter engagement tasks.
+</Card>
+
+#### Example Request
+
+```
+GET https://mach-prod-536329393577.asia-northeast1.run.app/v1/twitter/recent_tweet_id
+```
+
+#### Example Response
+
+```json
+{
+  "tweet": "1512345678901234567"
+}
+```
+
+<Card title="/v1/twitter/verify_retweet" icon="check-circle" iconType="solid">
+  **Method:** POST
+  
+  Verifies if a user has retweeted a specific tweet.
+</Card>
+
+#### Request Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| wallet | string | The wallet address of the user |
+| username | string | The Twitter username |
+| tweet_id | string | The ID of the tweet to verify |
+
+#### Example Request
+
+```json
+POST https://mach-prod-536329393577.asia-northeast1.run.app/v1/twitter/verify_retweet
+Content-Type: application/json
+
+{
+  "wallet": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+  "username": "user123",
+  "tweet_id": "1512345678901234567"
+}
+```
+
+#### Example Response
+
+```json
+{
+  "verified": true
+}
+```
+
+<Card title="/v1/twitter/submit_user_data" icon="user-plus" iconType="solid">
+  **Method:** POST
+  
+  Submits user data for Twitter integration.
+</Card>
+
+#### Request Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| wallet | string | The wallet address of the user |
+| twitter_handle | string | The Twitter handle |
+| telegram_handle | string | (Optional) The Telegram handle |
+| email | string | (Optional) The user's email |
+
+#### Example Request
+
+```json
+POST https://mach-prod-536329393577.asia-northeast1.run.app/v1/twitter/submit_user_data
+Content-Type: application/json
+
+{
+  "wallet": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+  "twitter_handle": "user123",
+  "telegram_handle": "user123",
+  "email": "user@example.com"
+}
+```
+
+#### Example Response
+
+```json
+{
+  "verified": true
+}
+```
+
+## Utility Endpoints
+
+<Card title="/tokenBalances" icon="wallet" iconType="solid">
+  **Method:** GET
+  
+  Returns token balances for a wallet address.
+</Card>
+
+#### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| wallet_address | string | Wallet address (supports Ethereum and Solana addresses) |
+
+#### Example Request
+
+```
+GET https://mach-prod-536329393577.asia-northeast1.run.app/tokenBalances?wallet_address=0x886431aee6486D68863D2963F3E7BC8683990210
+```
+
+<Card title="/gas_token_prices" icon="chart-line" iconType="solid">
+  **Method:** GET
+  
+  Returns current gas token prices.
+</Card>
+
+#### Example Request
+
+```
+GET https://mach-prod-536329393577.asia-northeast1.run.app/gas_token_prices
+```
+
+<Card title="/ping" icon="heartbeat" iconType="solid">
+  **Method:** GET
+  
+  Simple ping endpoint to check if the API is up.
+</Card>
+
+#### Example Request
+
+```
+GET https://mach-prod-536329393577.asia-northeast1.run.app/ping
+```
+
+## Error Handling
+
+The API uses standard HTTP status codes to indicate the success or failure of requests. Common status codes include:
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | OK - The request succeeded |
+| 400 | Bad Request - The request could not be processed due to client error |
+| 404 | Not Found - The requested resource was not found |
+| 422 | Unprocessable Entity - The request was well-formed but could not be processed |
+| 500 | Internal Server Error - Something went wrong on the server |
+
+When handling errors, always provide clear feedback to users about what went wrong and what they can do to resolve the issue.

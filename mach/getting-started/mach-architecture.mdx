@@ -1,0 +1,24 @@
+---
+title: "Mach Architecture"
+description: "How Mach breaks the sound barrier for cross-chain swaps"
+---
+
+# Mach Architecture
+
+Mach differentiates itself by breaking the sound barrier, allowing for cross-chain swaps that are not constrained by the speed of messaging protocols like LayerZero.
+
+## Background
+
+In the past, cross-chain solutions were defined by costly and inefficient design. All blockchains are technically hostile environments for order books, forcing developers to build out convoluted systems that are slow, expensive, and lack security. Legacy cross-chain technologies rely on a monolithic centralized approach, where the same team manages both liquidity and the off-chain transaction verification system. This unfortunately introduces significant security risk, making it dangerous to store assets inside. In the past five years, pool-based bridge exploits have resulted in just over $2.8 billion in losses - a massive and unforgivable amount in our industry.
+
+## Evolution of Cross-Chain Solutions
+
+The first step towards a meaningful solution came in the form of messaging protocols. Messaging protocols, such as LayerZero, offer a significant improvement by providing cheap, secure cross-chain data solutions. Their tight focus enables modular architectures, allowing transaction verification to be outsourced, decoupling liquidity management from the messaging layer. For users, this means faster, cheaper and more secure transactions, at a speed not seen before.
+
+## Mach v1 (Hourglass)
+
+Our Mach v1 (Hourglass) product utilized this architecture, to create a powerful stablecoin clearing protocol. Despite its innovation as what we would call the first viable on-chain order book, the limitations of the architecture quickly became apparent. Cross-chain swaps remained constrained by the "speed of sound" or chain-to-chain message passing, and the security and settlement of every transaction depended heavily on the reliability of these messages.
+
+## Mach v2: Breaking the Sound Barrier
+
+Through Mach v2, users can exceed the speed of sound (Mach) and go supersonic through our implementation of a novel optimistic, intents-based architecture. Rather than relying on message-passing to mirror orders across chains, the protocol only uses messaging as an extra layer of security, to guarantee seized collateral when commitments are not honored. This allows for the fastest, cheapest and most direct liquidity layer solution for users, while retaining optimal security and paves the way for more robust and scalable cross-chain transactions.

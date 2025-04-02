@@ -1,0 +1,136 @@
+---
+title: 'Submit CCTP Order'
+api: 'POST /v1/orders/cctp'
+description: 'Submit a Circle Cross-Chain Transfer Protocol (CCTP) transaction'
+---
+
+This endpoint allows you to submit a Circle Cross-Chain Transfer Protocol (CCTP) transaction to be processed by Mach. CCTP enables native USDC transfers across different blockchains.
+
+## Request Body
+
+<ParamField body="chain" type="string" required>
+  Source chain of the CCTP transaction (e.g., "avalanche", "ethereum")
+</ParamField>
+
+<ParamField body="burn_tx" type="string" required>
+  Transaction hash of the CCTP burn transaction
+</ParamField>
+
+<ParamField body="solana_token_owner_address" type="string">
+  (Optional) Solana token owner address, required only for Solana transactions
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  Unique identifier for the order
+</ResponseField>
+
+<ResponseField name="taker_address" type="string">
+  The address that initiated the order
+</ResponseField>
+
+<ResponseField name="maker_address" type="string">
+  The address that fulfilled the order (null if not yet fulfilled)
+</ResponseField>
+
+<ResponseField name="src_asset_address" type="string">
+  Address of the token being transferred
+</ResponseField>
+
+<ResponseField name="dst_asset_address" type="string">
+  Address of the token at the destination
+</ResponseField>
+
+<ResponseField name="src_chain" type="string">
+  The source chain of the order
+</ResponseField>
+
+<ResponseField name="dst_chain" type="string">
+  The destination chain of the order
+</ResponseField>
+
+<ResponseField name="src_amount" type="integer">
+  Amount of source token in the smallest unit
+</ResponseField>
+
+<ResponseField name="dst_amount" type="integer">
+  Amount of destination token to be received
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Timestamp when the order was created
+</ResponseField>
+
+<ResponseField name="filled_at" type="string">
+  Timestamp when the order was filled (null if not yet filled)
+</ResponseField>
+
+<ResponseField name="expires_at" type="string">
+  Timestamp when the order expires (null if no expiration)
+</ResponseField>
+
+<ResponseField name="completed" type="boolean">
+  Whether the order has been completed
+</ResponseField>
+
+<ResponseField name="place_tx" type="string">
+  Transaction hash of the burn transaction
+</ResponseField>
+
+<ResponseField name="fill_tx" type="string">
+  Transaction hash of the CCTP fulfillment (null if not yet fulfilled)
+</ResponseField>
+
+<ResponseField name="eta" type="integer">
+  Estimated time in seconds until the order is completed
+</ResponseField>
+
+<ResponseField name="order_type" type="string">
+  Will be "cctp" for CCTP orders
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request POST \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/orders/cctp' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "chain": "avalanche",
+    "burn_tx": "0x3cdc8d4da0e74b08f453f311e2031b2d518c769cc8d9b5783043a2e35a9e6428",
+    "solana_token_owner_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "6368f169-d9ad-53ec-b797-81b4dc74c257",
+  "taker_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+  "maker_address": null,
+  "src_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+  "dst_asset_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+  "src_chain": "avalanche",
+  "dst_chain": "arbitrum",
+  "src_amount": 1000000,
+  "dst_amount": 997000,
+  "created_at": "2023-05-01T12:34:56Z",
+  "filled_at": null,
+  "expires_at": null,
+  "completed": false,
+  "place_tx": "0x3cdc8d4da0e74b08f453f311e2031b2d518c769cc8d9b5783043a2e35a9e6428",
+  "fill_tx": null,
+  "eta": 300,
+  "order_type": "cctp"
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - CCTP order submitted successfully |
+| 422 | Validation Error - Invalid parameters |
+| 500 | Internal Server Error - Something went wrong on the server |

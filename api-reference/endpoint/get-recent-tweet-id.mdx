@@ -1,0 +1,35 @@
+---
+title: 'Get Recent Tweet ID'
+api: 'GET /v1/twitter/recent_tweet_id'
+description: 'Returns the ID of the most recent tweet for Twitter engagement tasks'
+---
+
+This endpoint retrieves the ID of the most recent tweet that should be used for Twitter engagement tasks, such as retweeting for rewards or points.
+
+## Response
+
+<ResponseField name="tweet" type="string">
+  The ID of the most recent tweet
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/twitter/recent_tweet_id'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "tweet": "1512345678901234567"
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Tweet ID returned successfully |
+| 500 | Internal Server Error - Something went wrong on the server |

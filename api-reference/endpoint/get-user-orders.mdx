@@ -1,0 +1,126 @@
+---
+title: 'Get User Orders'
+api: 'GET /v1/orders'
+description: 'Retrieves all orders associated with a specific wallet address'
+---
+
+This endpoint allows you to fetch all orders that have been placed by a specific wallet address. The response includes detailed information about each order, including its status, transaction details, and timing information.
+
+## Query Parameters
+
+<ParamField query="wallet" type="string" required>
+  The wallet address to retrieve orders for
+</ParamField>
+
+## Response
+
+An array of order objects, each containing:
+
+<ResponseField name="id" type="string">
+  Unique identifier for the order
+</ResponseField>
+
+<ResponseField name="taker_address" type="string">
+  The address that initiated the order
+</ResponseField>
+
+<ResponseField name="maker_address" type="string">
+  The address that fulfilled the order (null if not yet fulfilled)
+</ResponseField>
+
+<ResponseField name="src_asset_address" type="string">
+  Address of the token being sold
+</ResponseField>
+
+<ResponseField name="dst_asset_address" type="string">
+  Address of the token being purchased
+</ResponseField>
+
+<ResponseField name="src_chain" type="string">
+  The source chain of the order
+</ResponseField>
+
+<ResponseField name="dst_chain" type="string">
+  The destination chain of the order
+</ResponseField>
+
+<ResponseField name="src_amount" type="integer">
+  Amount of source token in the smallest unit
+</ResponseField>
+
+<ResponseField name="dst_amount" type="integer">
+  Amount of destination token to be received
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Timestamp when the order was created
+</ResponseField>
+
+<ResponseField name="filled_at" type="string">
+  Timestamp when the order was filled (null if not yet filled)
+</ResponseField>
+
+<ResponseField name="expires_at" type="string">
+  Timestamp when the order expires (null if no expiration)
+</ResponseField>
+
+<ResponseField name="completed" type="boolean">
+  Whether the order has been completed
+</ResponseField>
+
+<ResponseField name="place_tx" type="string">
+  Transaction hash of the order placement
+</ResponseField>
+
+<ResponseField name="fill_tx" type="string">
+  Transaction hash of the order fulfillment (null if not yet fulfilled)
+</ResponseField>
+
+<ResponseField name="eta" type="integer">
+  Estimated time in seconds until the order is completed
+</ResponseField>
+
+<ResponseField name="order_type" type="string">
+  Type of the order (e.g., "default", "cctp")
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/orders?wallet=0xb20094DFede30AbEe3a8d549BbA828b6fd771106'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+[
+  {
+    "id": "6368f169-d9ad-53ec-b797-81b4dc74c257",
+    "taker_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+    "maker_address": "0x123456789abcdef123456789abcdef123456789a",
+    "src_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+    "dst_asset_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
+    "src_chain": "avalanche",
+    "dst_chain": "arbitrum",
+    "src_amount": 1000000,
+    "dst_amount": 997000,
+    "created_at": "2023-05-01T12:34:56Z",
+    "filled_at": "2023-05-01T12:35:30Z",
+    "expires_at": "2023-05-01T12:39:56Z",
+    "completed": true,
+    "place_tx": "0x50da55b159ccd423ebcb315dd2949202e584473960008274514c5088f3d26de7",
+    "fill_tx": "0x60ea66b269ccd423ebcb315dd2949202e584473960008274514c5088f3d26ff8",
+    "eta": 0,
+    "order_type": "default"
+  }
+]
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Orders returned successfully |
+| 422 | Validation Error - Invalid wallet address format |
+| 500 | Internal Server Error - Something went wrong on the server |

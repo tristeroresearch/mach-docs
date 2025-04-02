@@ -1,0 +1,126 @@
+---
+title: "Market Making"
+description: "Guide to market making on Mach Exchange"
+---
+
+# Market Making on Mach Exchange
+
+This guide explains how to participate as a market maker on Mach Exchange, providing liquidity for cross-chain trades and earning fees in the process.
+
+## Market Participants
+
+Cross-chain orders are a fundamental interaction with the Mach protocol. The following example shows how to implement a cross-chain order contract by first identifying market participants.
+
+### Market Participant Roles
+
+1. **Taker**: The user who initiates a cross-chain swap order
+2. **Maker**: The market maker who fills the order by providing liquidity
+3. **Settlement Contract**: The smart contract that facilitates the swap
+
+## How Market Making Works
+
+Mach's approach to market making differs from traditional DEXs by not requiring pre-funded liquidity pools. Instead, market makers compete to fill orders, keeping their capital free until needed.
+
+### The Process
+
+1. A taker places an order on the source chain
+2. The order is broadcast to market makers
+3. Market makers compete to fill the order, with the best price winning
+4. The winning maker executes the destination side of the trade
+5. Settlement occurs optimistically with security guaranteed by the challenge system
+
+## Benefits for Market Makers
+
+- **Capital Efficiency**: No need to lock up funds in liquidity pools
+- **Flexible Strategies**: Implement your own pricing and risk management strategies
+- **Cross-Chain Opportunities**: Capitalize on price differences across multiple blockchains
+- **Fee Generation**: Earn fees from the spread between bid and ask prices
+- **Scalable Operations**: Scale your market making activities based on your available capital
+
+## Setting Up as a Market Maker
+
+### Prerequisites
+
+- Experience with blockchain development
+- Access to liquidity on multiple chains
+- Ability to monitor and respond to orders quickly
+- Understanding of cross-chain risks and opportunities
+
+### Technical Requirements
+
+1. **API Integration**: Connect to Mach's API to receive order notifications
+2. **Smart Contract Interaction**: Develop systems to interact with Mach's contracts
+3. **Risk Management**: Implement proper risk controls and monitoring
+4. **Order Execution**: Create efficient systems for filling orders
+
+## Code Example: Monitoring for Orders
+
+```javascript
+const axios = require('axios');
+
+// Function to poll for new orders
+async function pollForOrders() {
+  try {
+    const response = await axios.get('https://mach-prod-536329393577.asia-northeast1.run.app/v1/orders/available');
+    
+    // Process available orders
+    const availableOrders = response.data;
+    
+    for (const order of availableOrders) {
+      // Evaluate if you want to fill this order
+      if (shouldFillOrder(order)) {
+        await fillOrder(order);
+      }
+    }
+  } catch (error) {
+    console.error('Error polling for orders:', error);
+  }
+}
+
+// Function to decide if an order should be filled
+function shouldFillOrder(order) {
+  // Implement your own pricing and risk logic
+  // Example: Check if the spread is profitable
+  const profitMargin = calculateProfitMargin(order);
+  return profitMargin > YOUR_MINIMUM_PROFIT_THRESHOLD;
+}
+
+// Function to fill an order
+async function fillOrder(order) {
+  try {
+    // Execute the fill transaction
+    // This would involve interacting with Mach contracts
+    console.log(`Filling order ${order.id}`);
+    
+    // Submit the fill transaction to Mach API
+    await axios.post('https://mach-prod-536329393577.asia-northeast1.run.app/v1/orders/fill', {
+      orderId: order.id,
+      fillTx: 'YOUR_TRANSACTION_HASH'
+    });
+    
+    console.log(`Successfully filled order ${order.id}`);
+  } catch (error) {
+    console.error(`Error filling order ${order.id}:`, error);
+  }
+}
+
+// Start polling for orders (every 5 seconds)
+setInterval(pollForOrders, 5000);
+```
+
+## Best Practices
+
+1. **Diversify Assets**: Maintain liquidity across multiple tokens and chains
+2. **Monitor Slippage**: Adjust prices based on order size to manage risk
+3. **Optimize Gas Costs**: Implement strategies to minimize gas expenses
+4. **Stay Informed**: Keep up with changes to the Mach protocol and supported chains
+5. **Risk Management**: Implement circuit breakers and limits to protect against extreme market conditions
+
+## Resources
+
+- [API Documentation](/api-reference/integration-endpoints)
+- [Challenge System](/mach/protocol-concepts/challenge-system)
+- [Cross-Chain Swaps](/mach/protocol-concepts/cross-chain-swaps)
+- [Market Making Discord Channel](https://discord.gg/mach-exchange)
+
+Becoming a market maker on Mach Exchange offers significant opportunities for generating returns while contributing to the ecosystem's liquidity and efficiency. By following this guide, you'll be well on your way to becoming a successful market maker in the Mach ecosystem.

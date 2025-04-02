@@ -1,0 +1,168 @@
+---
+title: "Multi-Chain Support"
+description: "How Mach supports transactions across different blockchain ecosystems"
+---
+
+# Multi-Chain Support
+
+Mach Exchange is designed from the ground up to support seamless transactions across multiple blockchain ecosystems. This allows users to swap tokens between different chains without needing to use multiple bridges or exchanges.
+
+## Supported Blockchain Ecosystems
+
+Mach currently supports three major blockchain ecosystems:
+
+### EVM Chains
+
+Ethereum Virtual Machine (EVM) compatible chains include:
+
+- Ethereum (Mainnet)
+- Arbitrum
+- Optimism
+- Base
+- Avalanche C-Chain
+- BNB Chain
+- Polygon
+- And more...
+
+EVM chains share a compatible address format and similar smart contract structure, making it easier to build consistent integration patterns across them.
+
+### Solana (SVM)
+
+Solana has its own ecosystem with different address formats and transaction structures compared to EVM chains. Mach supports Solana natively, allowing direct swaps between Solana-based tokens and tokens on other supported chains.
+
+Key considerations for Solana integration:
+- Different address format (base58 encoded)
+- Program-based rather than contract-based architecture
+- Different transaction confirmation mechanisms
+
+### Tron
+
+Tron has its own blockchain infrastructure with specific requirements:
+- Tron addresses start with "T"
+- Different smart contract interaction patterns
+- TRX is the native gas token
+
+## Chain Display and User Experience
+
+When building a user interface that integrates Mach, it's important to clearly indicate which chain each token belongs to. As mentioned in the implementation of the WalletPortfolioDrawer component, you can:
+
+1. Show chain icons as small badges next to token icons
+2. Sort chain tabs based on asset value (highest to lowest)
+3. Properly size chain icons with special handling for certain chains like Tron
+4. Implement chain filters to allow users to view tokens from specific chains
+
+## Chain-Specific Integration Notes
+
+### EVM Chains
+
+For EVM chains, you'll primarily interact with:
+- The Mach swap contract deployed on each EVM chain
+- ERC-20 token contracts for token approvals and transfers
+
+```typescript
+// Example: Getting token approval on an EVM chain
+async function approveERC20(
+  tokenContract: ethers.Contract,
+  spenderAddress: string,
+  amount: BigNumber
+): Promise<boolean> {
+  const tx = await tokenContract.approve(spenderAddress, amount);
+  await tx.wait();
+  return true;
+}
+```
+
+### Solana Integration
+
+For Solana integration:
+- You'll need to use Solana-specific libraries (e.g., @solana/web3.js)
+- Handle different signing mechanisms
+- Account for Solana's Program Derived Addresses (PDAs)
+
+```typescript
+// Example: Handling Solana transactions
+import { Connection, PublicKey, Transaction } from '@solana/web3.js';
+
+async function executeSolanaTransaction(
+  connection: Connection,
+  transaction: Transaction,
+  signer: Keypair
+): Promise<string> {
+  const signature = await connection.sendTransaction(transaction, [signer]);
+  await connection.confirmTransaction(signature);
+  return signature;
+}
+```
+
+### Tron Integration
+
+For Tron integration:
+- Use TronWeb for interacting with the Tron blockchain
+- Handle Tron's energy and bandwidth resource model
+- Account for Tron's address format differences
+
+```typescript
+// Example: Interacting with Tron
+import TronWeb from 'tronweb';
+
+async function approveTRC20(
+  tronWeb: TronWeb,
+  tokenAddress: string,
+  spenderAddress: string,
+  amount: string
+): Promise<boolean> {
+  const contract = await tronWeb.contract().at(tokenAddress);
+  const tx = await contract.approve(spenderAddress, amount).send();
+  return true;
+}
+```
+
+## Dynamic Chain Selection in the UI
+
+When implementing Mach in your application, consider adding features that enhance the multi-chain experience:
+
+1. **Chain Filter:** Allow users to filter tokens by different blockchain networks (All, EVM, Tron, Solana)
+2. **Dynamic Chain Tabs:** Sort chain tabs based on asset value for a better user experience
+3. **Chain Indicators:** Use appropriately sized chain icons as badges to indicate which chain each token belongs to
+4. **Proper Chain Name Display:** Show proper singular/plural handling for connected wallet counts (e.g., "1 Connected Wallet" vs "2 Connected Wallets")
+
+## Chain-Specific Configuration
+
+When fetching configuration from Mach's API, you'll receive chain-specific information that you'll need to use when integrating:
+
+```typescript
+// Example of processing chain configuration
+function processChainConfig(config) {
+  const chainInfo = {};
+  
+  config.chains.forEach(chain => {
+    chainInfo[chain.id] = {
+      chainId: chain.chainId,
+      name: chain.name,
+      nativeToken: chain.nativeToken,
+      swapContract: chain.swapContract,
+      rpcUrl: chain.rpcUrl,
+      // Determine chain type based on chain ID or other properties
+      type: determineChainType(chain.chainId)
+    };
+  });
+  
+  return chainInfo;
+}
+
+function determineChainType(chainId) {
+  if (chainId === 'solana') return 'SVM';
+  if (chainId === 'tron') return 'Tron';
+  return 'EVM'; // Default to EVM for other chains
+}
+```
+
+## Testing Multi-Chain Support
+
+When testing your Mach integration, it's important to test across all supported chain types:
+
+1. **Testnet Support:** Mach provides testnet environments for testing integrations without using real assets
+2. **Chain-Specific Testing:** Test each chain type (EVM, Solana, Tron) separately
+3. **Cross-Chain Testing:** Test swaps between different chain types
+
+By properly supporting multiple chains in your Mach integration, you can provide users with a seamless cross-chain experience that abstracts away the complexities of different blockchain ecosystems.

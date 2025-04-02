@@ -1,33 +1,84 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'Mach API Reference'
+description: 'API documentation for Mach Exchange integration'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+# Mach API Reference
 
-## Welcome
+The Mach API provides developers with powerful tools to integrate with the Mach Exchange protocol for cross-chain swaps. This documentation outlines the available endpoints and their usage for seamless integration.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+## API Overview
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+Mach's API enables developers to:
+
+- Fetch quotes for cross-chain token swaps
+- Submit and fill orders for cross-chain swaps
+- Track order status and transaction history
+- Access market data for supported tokens and chains
+- Monitor protocol metrics and liquidity information
+
+## API Environments
+
+Mach provides both mainnet and testnet environments:
+
+- **Mainnet API**: For production applications dealing with real assets
+- **Testnet API**: For development and testing without risking real assets
+
+In your implementation, you should determine which API to use based on the chain being used:
+
+```typescript
+// Determine which API to use based on chain type
+const api = !isTestnet(CHAIN_IDS[chainName]) 
+  ? cacheHalfFullApi         // Mainnet API
+  : cacheHalfFullTestnetApi; // Testnet API
+```
+
+## Integration Workflow
+
+A typical integration with Mach involves these key steps:
+
+1. **Fetch Available Tokens and Chains**: Get the list of supported tokens and chains from the configuration endpoint
+2. **Request a Quote**: Get pricing information for a potential swap
+3. **Execute On-Chain Transaction**: Have the user call the `placeTrade` function on the Mach smart contract
+4. **Submit the Order**: Send the transaction information to Mach's API to fulfill the cross-chain swap
+5. **Track Order Status**: Monitor the status of the order until completion
+
+## Error Handling
+
+When integrating with Mach's API, it's important to properly handle different types of responses:
+
+- **200 OK**: Order successfully received and being processed
+- **202 Accepted**: Order accepted but will take some time to find a match
+- **400 Bad Request**: Order rejected by the market maker
+- **422 Unprocessable Entity**: Invalid payload format or parameters
+- **Network Errors**: Connection issues, timeouts, etc.
+
+Your implementation should provide appropriate feedback to users based on these responses.
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+Some API endpoints may require authentication using Bearer tokens. Please contact the Mach team to obtain API credentials if needed.
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
-```
+## Rate Limiting
+
+The API implements rate limiting to ensure fair usage. Your application should handle rate limit responses (HTTP 429) appropriately by implementing backoff strategies.
+
+## Getting Started
+
+Explore the API endpoints in the following sections to begin your integration:
+
+<Card
+  title="API Endpoints"
+  icon="server"
+  href="/api-reference/integration-endpoints"
+>
+  Browse available API endpoints for integration
+</Card>
+
+<Card
+  title="Smart Contract Integration"
+  icon="file-contract"
+  href="/mach/getting-started/integrating-mach"
+>
+  Learn how to integrate with Mach smart contracts
+</Card>

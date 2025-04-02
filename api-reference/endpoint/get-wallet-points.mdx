@@ -1,0 +1,47 @@
+---
+title: 'Get Wallet Points'
+api: 'GET /v1/points/{wallet}'
+description: 'Returns points for a specific wallet address'
+---
+
+This endpoint retrieves the points earned by a specific wallet address on Mach Exchange.
+
+## Path Parameters
+
+<ParamField path="wallet" type="string" required>
+  The wallet address to retrieve points for
+</ParamField>
+
+## Response
+
+<ResponseField name="wallet" type="string">
+  Wallet address
+</ResponseField>
+
+<ResponseField name="points" type="number">
+  Number of points earned by the wallet
+</ResponseField>
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/points/0xb20094DFede30AbEe3a8d549BbA828b6fd771106'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "wallet": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
+  "points": 1500
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Wallet points returned successfully |
+| 422 | Validation Error - Invalid wallet address format |
+| 500 | Internal Server Error - Something went wrong on the server |

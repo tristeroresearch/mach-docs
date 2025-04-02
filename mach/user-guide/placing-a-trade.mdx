@@ -1,0 +1,50 @@
+---
+title: "Placing a Trade"
+description: "How to place trades on Mach Exchange"
+---
+
+# Placing a Trade
+
+When you place a trade on Mach, **your funds remain in your wallet until a match is found**.
+
+## How It Works
+
+1. **Sign Permission**: Users first sign a transaction that grants the smart contract permissions to interact with your asset. None of these assets are moved during this initial step.
+
+   ![Transaction Signing](https://docs.mach.exchange/~gitbook/image?url=https%3A%2F%2F2022487005-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FBAHWbUztTgbMK2A8fqqv%252Fuploads%252F1eTWQcJX9b2w08Ra3INF%252FScreenshot%25202024-05-30%2520at%252010.29.19%2520AM.png%3Falt%3Dmedia%26token%3Dfc8649a4-6103-48f4-8936-884cbd052447&width=768&dpr=4&quality=100&sign=e48a8018&sv=2)
+
+2. **Match Finding**: After signing the transaction, the system begins searching for the best possible match.
+
+   ![Match Finding](https://docs.mach.exchange/~gitbook/image?url=https%3A%2F%2F2022487005-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FBAHWbUztTgbMK2A8fqqv%252Fuploads%252FWL1KiHFqmafl9PXcQTgY%252Fimage.png%3Falt%3Dmedia%26token%3Dbac20319-bb2f-4628-8e22-e73e8087c334&width=768&dpr=4&quality=100&sign=feff0452&sv=2)
+
+3. **Execution**: Once a match is found, the funds are pulled and paid out in tight succession.
+
+   ![Funds Pulled](https://docs.mach.exchange/~gitbook/image?url=https%3A%2F%2F2022487005-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FBAHWbUztTgbMK2A8fqqv%252Fuploads%252F73cqK7WHL2AZhNCIhBLb%252FScreenshot%25202024-05-30%2520at%252010.58.11%2520AM.png%3Falt%3Dmedia%26token%3D5aed1d13-4eaf-4d2c-b0f3-16603b61253c&width=768&dpr=4&quality=100&sign=79cd4064&sv=2)
+   
+   Smart Contract pulls funds
+
+   ![Funds Paid Out](https://docs.mach.exchange/~gitbook/image?url=https%3A%2F%2F2022487005-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FBAHWbUztTgbMK2A8fqqv%252Fuploads%252FrMj8JMClNFqrWa31dHV5%252FScreenshot%25202024-05-30%2520at%252010.58.24%2520AM.png%3Falt%3Dmedia%26token%3D0914e39e-243c-4699-a7e3-2d9c3858ed3f&width=768&dpr=4&quality=100&sign=80ea2fab&sv=2)
+   
+   Smart Contract pays out funds
+
+4. **Settlement**: The entire swap is processed **in just one block**, providing near-instant settlement.
+
+## Key Benefits
+
+- **Secure**: Your funds stay in your wallet until the trade is ready to execute
+- **Efficient**: No need to pre-deposit funds into a separate contract or pool
+- **Fast**: Trades complete in a single block once a match is found
+- **Low Cost**: Optimized execution minimizes gas fees
+
+## Trade Flow Diagram
+
+```mermaid
+flowchart TD
+    A[User signs transaction] --> B[System searches for match]
+    B --> C{Match found?}
+    C -->|Yes| D[Funds pulled from wallet]
+    C -->|No| E[Continues searching]
+    E --> C
+    D --> F[Trade executed]
+    F --> G[Funds delivered to wallet]
+```

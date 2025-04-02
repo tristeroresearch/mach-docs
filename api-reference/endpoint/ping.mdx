@@ -1,0 +1,34 @@
+---
+title: 'Ping'
+api: 'GET /ping'
+description: 'Simple ping endpoint to check if the API is up'
+---
+
+This is a simple health check endpoint that can be used to verify if the Mach API is operational.
+
+## Response
+
+The response indicates that the API is up and running.
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/ping'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "status": "ok",
+  "message": "pong"
+}
+```
+</ResponseExample>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - API is operational |
+| 500 | Internal Server Error - Something went wrong on the server |
