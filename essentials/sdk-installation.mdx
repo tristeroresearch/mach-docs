@@ -5,38 +5,86 @@ description: 'Guide to installing and setting up the Mach SDK in your project'
 
 # Installing the Mach SDK
 
-The Mach SDK provides easy access to the Mach Exchange functionality, allowing you to integrate cross-chain swaps, order management, and more into your application.
+The Mach SDK provides easy access to the Mach Exchange functionality, allowing you to integrate cross-chain swaps, order management, and more into your application. It's available on NPM and GitHub and can be used in both browsers and Node.js environments.
 
 ## Installation
 
 ### Using npm
 
 ```bash
-npm install @mach-exchange/sdk
+npm install @tristeroresearch/mach-sdk
 ```
 
 ### Using yarn
 
 ```bash
-yarn add @mach-exchange/sdk
+yarn add @tristeroresearch/mach-sdk
 ```
 
-## Basic Setup
+### Dependencies
 
-After installing the SDK, you'll need to initialize it in your application:
+The Mach SDK uses [viem](https://viem.sh/) for Ethereum interactions. If you don't already have it in your project, you'll need to install it:
+
+```bash
+npm install viem
+# or with yarn
+yarn add viem
+```
+
+## Repository Links
+
+- **NPM**: [https://www.npmjs.com/package/@tristeroresearch/mach-sdk](https://www.npmjs.com/package/@tristeroresearch/mach-sdk)
+- **GitHub**: [https://github.com/tristeroresearch/mach-sdk](https://github.com/tristeroresearch/mach-sdk)
+
+## SDK Structure
+
+The SDK is organized into several key components:
+
+### Contracts
+
+Contains interfaces for interacting with:
+- Mach platform contracts
+- ERC20 token contracts
+- Wrapped ETH contracts
+
+### Helpers
+
+Utility functions for blockchain operations, including:
+- Creating wallet clients for blockchain interaction (`createWalletClients`)
+- Encoding order data for submission (`encodeOrderData`)
+- Market making operations (`marketMakeOrder`)
+- Chain and token utility functions (`getChainFromName`, `dollarToTokenValue`, `getQuote`)
+
+### Utils
+
+Contains utility functions for the SDK, including:
+- Getting gas values for transactions
+
+### Constants
+
+Provides easy access to:
+- Token addresses on each chain
+- Chain configurations
+- Contract addresses
+
+## Basic Import
+
+After installation, you can import the SDK components like this:
 
 ```typescript
-import { MachSDK } from '@mach-exchange/sdk';
+// Import specific functions
+import {
+  createWalletClients,
+  encodeOrderData,
+  marketMakeOrder,
+  getChainFromName,
+  contracts,
+  dollarToTokenValue,
+  getQuote,
+} from "@tristeroresearch/mach-sdk";
 
-// Initialize with default settings
-const machSdk = new MachSDK();
-
-// Or with custom configuration
-const machSdk = new MachSDK({
-  apiUrl: 'https://api.mach.exchange',
-  networkId: 1, // Ethereum Mainnet
-  debug: false
-});
+// Import constants
+import { tokens, chains } from "@tristeroresearch/mach-sdk/constants";
 ```
 
 ## Requirements
@@ -49,9 +97,8 @@ const machSdk = new MachSDK({
 
 Once you have installed the SDK, you can proceed to:
 
-- [Basic Integration](/essentials/basic-integration) - Learn how to perform your first operations
-- [Wallet Connection](/essentials/wallet-connection) - Connect to user wallets
-- [Order Management](/essentials/order-management) - Manage orders and trades
+- [Using the Mach SDK](/mach/user-guide/using-mach-sdk) - Learn how to implement cross-chain swaps
+- [Integrating Mach](/mach/getting-started/integrating-mach) - Full integration guide with examples
 
 ## Troubleshooting
 
@@ -60,4 +107,4 @@ If you encounter issues during installation:
 1. Make sure your Node.js version is compatible
 2. Check for any conflicting dependencies
 3. If using TypeScript, ensure your `tsconfig.json` is properly configured
-4. Consult the [GitHub repository](https://github.com/mach-exchange/mach-sdk) for open issues
+4. Consult the [GitHub repository](https://github.com/tristeroresearch/mach-sdk) for open issues

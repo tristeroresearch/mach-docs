@@ -7,6 +7,160 @@ description: "Guide for integrating Mach into your applications"
 
 > More integration examples are coming! Feel free to ping us on Telegram and we will work with you directly to fast track your integration.
 
+## Integration Options
+
+There are two primary ways to integrate Mach into your application:
+
+1. **Using the Mach SDK** - A streamlined approach with pre-built functions and helpers
+2. **Direct Integration** - Manually implementing the integration using your preferred libraries
+
+## Using the Mach SDK
+
+The recommended way to integrate Mach is through our official SDK, which simplifies the integration process and handles many of the low-level details for you.
+
+```bash
+# Install the SDK
+npm install @tristeroresearch/mach-sdk
+```
+
+With the SDK, the integration process becomes much simpler:
+
+```typescript
+import { createWalletClients, approveToken, encodeOrderData, makeOrder } from '@tristeroresearch/mach-sdk/helpers';
+
+async function executeCrossChainSwap(params) {
+  // 1. Set up wallet clients
+  const walletClients = createWalletClients({ provider: window.ethereum });
+  
+  // 2. Approve token spend if needed
+  await approveToken(
+    walletClients[params.sourceChain],
+    params.sourceToken,
+    getMachContractAddress(params.sourceChain),
+    params.amount
+  );
+  
+  // 3. Place the order on-chain
+  const tx = await walletClients[params.sourceChain].machContract.placeTrade(
+    params.sourceToken,
+    params.destinationToken,
+    params.destinationChain,
+    params.amount,
+    params.destinationAddress
+  );
+  
+  const receipt = await tx.wait();
+  
+  // 4. Complete the order via API
+  const result = await makeOrder({
+    chain: params.sourceChain,
+    place_taker_tx: receipt.transactionHash
+  });
+  
+  return result;
+}
+```
+
+### Real-World SDK Example
+
+Here's a complete example demonstrating how to trade USDC on Arbitrum for USDT on Optimism using the Mach SDK:
+
+```typescript
+/**
+ * This script is used to trade USDC on Arbitrum for USDT on Optimism
+ * It demonstrates how to build a transaction locally and send it to the network,
+ * while utilizing the Mach SDK to get the quote and encode the order data
+ */
+import {
+  createWalletClients,
+  encodeOrderData,
+  marketMakeOrder,
+  getChainFromName,
+  contracts,
+  dollarToTokenValue,
+  getQuote,
+} from "@tristeroresearch/mach-sdk";
+import { Hex } from "viem";
+import { tokens, chains } from "@tristeroresearch/mach-sdk/constants";
+
+try {
+  // Define the source and destination assets
+  const srcChain = chains.arbitrum;
+  const srcAsset = tokens.arb.USDC;
+  const dstAsset = tokens.op.USDT;
+  
+  // Convert dollar amount to token value (0.005 USD)
+  const amt = await dollarToTokenValue(0.005, srcAsset);
+
+  // Create wallet clients with private key (for server-side usage)
+  // For client-side, you would connect to the user's wallet
+  const { publicClient, walletClient, account } = createWalletClients(srcChain, process.env.PRIVATE_KEY! as Hex);
+
+  // Get the Mach contract address for the source chain
+  const contractAddress = contracts.arb.order_book;
+
+  // Get a quote for the swap
+  const quote = await getQuote(srcAsset, dstAsset, amt);
+
+  // Encode order data for the contract call
+  const data = encodeOrderData(quote);
+
+  // Estimate gas for the transaction
+  const gas = await publicClient.estimateGas({
+    to: contractAddress,
+    data,
+    account: account,
+  });
+
+  // Get chain configuration for the transaction
+  const chain = getChainFromName(srcChain);
+
+  // Sign the transaction
+  const signedHash = await walletClient.signTransaction({
+    to: contractAddress,
+    chain,
+    data,
+    value: 0n,
+    nonce: await publicClient.getTransactionCount({
+      address: account.address,
+    }),
+    account: account,
+    type: "eip1559",
+    maxFeePerGas: BigInt("20000000"),
+    maxPriorityFeePerGas: BigInt("1000000"),
+    gas,
+  });
+
+  // Send the signed transaction
+  const hash = await publicClient.sendRawTransaction({
+    serializedTransaction: signedHash,
+  });
+
+  // Wait for transaction confirmation
+  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+  // Call the market maker to complete the order
+  const response = await marketMakeOrder(srcChain, receipt);
+  console.log(response);
+} catch (error) {
+  console.error("Error making transaction:", error);
+}
+```
+
+For more details on using the SDK, see our [Using the Mach SDK](/mach/user-guide/using-mach-sdk) guide.
+
+## Direct Integration
+
+If you prefer to implement the integration directly without using our SDK, follow the steps below.
+
+Fundamentally, there are three steps:
+
+1. **Load the token contract addresses** that the user wants to transact between & the swap Mach contract on the sell-side network (and make sure that token spend is approved). You can get all of our supported tokens and networks from our API.
+
+2. **Build and issue a transaction** that executes the `placeTrade` function on the Mach contract, which places an order onto the order book.
+
+3. **Build and issue an API call** to a backend server that fills the order (check out ours in our [API docs](https://cache-half-full-production.fly.dev/docs#/default/make_order_make_order_post)).
+
 ## Integrating Mach into Client Apps
 
 Fundamentally, there are three steps:

@@ -1,0 +1,242 @@
+---
+title: "Using the Mach SDK"
+description: "Detailed guide for implementing cross-chain swaps with the Mach SDK"
+---
+
+# Using the Mach SDK
+
+The Mach SDK simplifies the process of integrating cross-chain functionality into your applications. This guide covers key aspects of implementing the SDK for common use cases.
+
+## SDK Installation
+
+To install the Mach SDK in your project, use npm or yarn:
+
+```bash
+# Using npm
+npm install @tristeroresearch/mach-sdk
+
+# Using yarn
+yarn add @tristeroresearch/mach-sdk
+```
+
+For more installation details, see [Installing the Mach SDK](/essentials/sdk-installation).
+
+## SDK Structure Overview
+
+The SDK is structured into several components:
+
+- **Contracts** - Interfaces for the Mach platform contracts and token contracts
+- **Helpers** - Utility functions for blockchain operations
+- **Utils** - General utility functions for the SDK
+- **Constants** - Chain and token configurations
+
+## Cross-Chain Swap Implementation
+
+### Basic Implementation Flow
+
+Implementing a cross-chain swap with the Mach SDK typically follows these steps:
+
+1. Create wallet clients
+2. Get a quote for the swap
+3. Encode the order data
+4. Execute the transaction
+5. Complete the order via the market maker API
+
+### Real-World Example
+
+Here's a complete example demonstrating how to trade USDC on Arbitrum for USDT on Optimism:
+
+```typescript
+/**
+ * This script is used to trade USDC on Arbitrum for USDT on Optimism
+ * It demonstrates how to build a transaction locally and send it to the network,
+ * while utilizing the Mach SDK to get the quote and encode the order data
+ */
+import {
+  createWalletClients,
+  encodeOrderData,
+  marketMakeOrder,
+  getChainFromName,
+  contracts,
+  dollarToTokenValue,
+  getQuote,
+} from "@tristeroresearch/mach-sdk";
+import { Hex } from "viem";
+import { tokens, chains } from "@tristeroresearch/mach-sdk/constants";
+
+try {
+  // Define the source and destination assets
+  const srcChain = chains.arbitrum;
+  const srcAsset = tokens.arb.USDC;
+  const dstAsset = tokens.op.USDT;
+  
+  // Convert dollar amount to token value (0.005 USD)
+  const amt = await dollarToTokenValue(0.005, srcAsset);
+
+  // Create wallet clients with private key (for server-side usage)
+  // For client-side, you would connect to the user's wallet
+  const { publicClient, walletClient, account } = createWalletClients(srcChain, process.env.PRIVATE_KEY! as Hex);
+
+  // Get the Mach contract address for the source chain
+  const contractAddress = contracts.arb.order_book;
+
+  // Get a quote for the swap
+  const quote = await getQuote(srcAsset, dstAsset, amt);
+
+  // Encode order data for the contract call
+  const data = encodeOrderData(quote);
+
+  // Estimate gas for the transaction
+  const gas = await publicClient.estimateGas({
+    to: contractAddress,
+    data,
+    account: account,
+  });
+
+  // Get chain configuration for the transaction
+  const chain = getChainFromName(srcChain);
+
+  // Sign the transaction
+  const signedHash = await walletClient.signTransaction({
+    to: contractAddress,
+    chain,
+    data,
+    value: 0n,
+    nonce: await publicClient.getTransactionCount({
+      address: account.address,
+    }),
+    account: account,
+    type: "eip1559",
+    maxFeePerGas: BigInt("20000000"),
+    maxPriorityFeePerGas: BigInt("1000000"),
+    gas,
+  });
+
+  // Send the signed transaction
+  const hash = await publicClient.sendRawTransaction({
+    serializedTransaction: signedHash,
+  });
+
+  // Wait for transaction confirmation
+  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+  // Call the market maker to complete the order
+  const response = await marketMakeOrder(srcChain, receipt);
+  console.log(response);
+} catch (error) {
+  console.error("Error making transaction:", error);
+}
+```
+
+## Key SDK Functions
+
+### createWalletClients
+
+Creates wallet clients for interacting with the blockchain. It can be used with a private key for server-side applications or with a provider for client-side applications.
+
+```typescript
+// Server-side with private key
+const { publicClient, walletClient, account } = createWalletClients(
+  chainName, 
+  privateKey
+);
+
+// Client-side with provider (like MetaMask)
+const { publicClient, walletClient, account } = createWalletClients(
+  chainName, 
+  undefined, 
+  window.ethereum
+);
+```
+
+### getQuote
+
+Fetches a quote for swapping between two tokens:
+
+```typescript
+const quote = await getQuote(
+  sourceAsset,   // Source token object
+  destAsset,     // Destination token object
+  amount         // Amount to swap (in smallest units)
+);
+```
+
+### dollarToTokenValue
+
+Converts a dollar amount to the equivalent token value:
+
+```typescript
+// Convert $5 to USDC token value
+const tokenAmount = await dollarToTokenValue(5, tokens.arb.USDC);
+```
+
+### encodeOrderData
+
+Encodes order data for the Mach contract call:
+
+```typescript
+const data = encodeOrderData(quote);
+```
+
+### marketMakeOrder
+
+Sends the order to the market maker to complete the cross-chain swap:
+
+```typescript
+const response = await marketMakeOrder(sourceChain, transactionReceipt);
+```
+
+## Token and Chain References
+
+The SDK provides convenient references to supported tokens and chains via the constants module:
+
+```typescript
+import { tokens, chains } from "@tristeroresearch/mach-sdk/constants";
+
+// Reference tokens by chain
+const arbitrumUSDC = tokens.arb.USDC;
+const optimismUSDT = tokens.op.USDT;
+
+// Reference chains
+const arbitrumChain = chains.arbitrum;
+const optimismChain = chains.optimism;
+```
+
+## Error Handling
+
+Implement robust error handling for a better user experience:
+
+```typescript
+try {
+  // Your swap implementation here
+} catch (error) {
+  if (error.code === 4001) {
+    // User rejected the transaction
+    console.log("Transaction rejected by user");
+  } else if (error.message.includes("insufficient funds")) {
+    // Insufficient funds error
+    console.log("Insufficient funds for transaction");
+  } else {
+    // Other errors
+    console.error("Error:", error);
+  }
+}
+```
+
+## Best Practices
+
+When implementing the Mach SDK:
+
+1. **Always estimate gas** for transactions to avoid failures
+2. **Implement proper error handling** for different error scenarios
+3. **Show transaction status** to users during the swap process
+4. **Use the SDK's convenience functions** rather than implementing custom logic
+5. **Store transaction hashes** for later reference
+
+By following these guidelines, you can provide a seamless cross-chain trading experience for your users.
+
+## Further Reading
+
+- [Mach Architecture](/mach/getting-started/mach-architecture)
+- [Multi-Chain Support](/mach/getting-started/multi-chain-support)
+- [Security Best Practices](/mach/user-guide/security-best-practices)
