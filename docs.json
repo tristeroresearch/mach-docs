@@ -1,5 +1,6 @@
 {
-  "theme": "dark",
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
   "name": "Mach Exchange Docs",
   "colors": {
     "primary": "#202020",
