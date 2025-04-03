@@ -115,6 +115,11 @@
           "icon": "book-open-cover"
         },
         {
+          "anchor": "Feedback",
+          "href": "https://feedback.mach.exchange/roadmap",
+          "icon": "message"
+        },
+        {
           "anchor": "Community",
           "href": "https://discord.com/invite/mach",
           "icon": "discord"
