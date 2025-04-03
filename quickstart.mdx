@@ -1,97 +1,124 @@
 ---
 title: 'Quickstart'
-description: 'Start building awesome documentation in under 5 minutes'
+description: 'Start building with Mach Protocol in minutes'
 ---
 
-## Setup your development
+## Getting Started with Mach SDK
 
-Learn how to update your docs locally and deploy them to the public.
+This quickstart guide will help you integrate Mach Protocol into your application and execute your first cross-chain swap.
 
-### Edit and preview
+### Prerequisites
 
-<AccordionGroup>
-  <Accordion icon="github" title="Clone your docs locally">
-    During the onboarding process, we created a repository on your Github with
-    your docs content. You can find this repository on our
-    [dashboard](https://dashboard.mintlify.com). To clone the repository
-    locally, follow these
-    [instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-    in your terminal.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Preview changes">
-    Previewing helps you make sure your changes look as intended. We built a
-    command line interface to render these changes locally. 
-    1. Install the
-    [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview the
-    documentation changes locally with this command: ``` npm i -g mintlify ```
-    2. Run the following command at the root of your documentation (where
-    `docs.json` is): ``` mintlify dev ```
-    <Note>
-      If you’re currently using the legacy ```mint.json``` configuration file, please update the Mintlify CLI:
+Before you begin, make sure you have:
+- Node.js 20+ installed
+- A project where you want to add cross-chain functionality
+- A private key for transaction signing (for testing purposes)
 
+### Installation
 
-      ```npm i -g mintlify@latest```
-      And run the new upgrade command in your docs repository:
+<CodeGroup>
+```bash npm
+npm install @tristeroresearch/mach-sdk@latest
+```
 
-      ```mintlify upgrade```
-      You should now be using the new ```docs.json``` configuration file. Feel free to delete the ```mint.json``` file from your repository.
-    </Note>
-  </Accordion>
-</AccordionGroup>
+```bash yarn
+yarn add @tristeroresearch/mach-sdk@latest
+```
 
-### Deploy your changes
+```bash pnpm
+pnpm add @tristeroresearch/mach-sdk@latest
+```
+</CodeGroup>
 
-<AccordionGroup>
+### Basic Implementation
 
-<Accordion icon="message-bot" title="Install our Github app">
-  Our Github app automatically deploys your changes to your docs site, so you
-  don't need to manage deployments yourself. You can find the link to install on
-  your [dashboard](https://dashboard.mintlify.com). Once the bot has been
-  successfully installed, there should be a check mark next to the commit hash
-  of the repo.
-</Accordion>
-<Accordion icon="rocket" title="Push your changes">
-  [Commit and push your changes to
-  Git](https://docs.github.com/en/get-started/using-git/pushing-commits-to-a-remote-repository#about-git-push)
-  for your changes to update in your docs site. If you push and don't see that
-  the Github app successfully deployed your changes, you can also manually
-  update your docs through our [dashboard](https://dashboard.mintlify.com).
-</Accordion>
+Here's a minimal example to perform a cross-chain swap with the Mach SDK:
 
-</AccordionGroup>
+```javascript
+import { swapTokens } from '@tristeroresearch/mach-sdk';
 
-## Update your docs
+// Function to perform a cross-chain swap
+async function performCrossChainSwap() {
+  try {
+    const result = await swapTokens({
+      fromChain: 'ethereum',    // Source chain
+      toChain: 'arbitrum',      // Destination chain
+      fromToken: 'USDC',        // Token to swap from
+      toToken: 'USDC',          // Token to receive
+      amount: '10',             // Amount to swap (in USDC)
+      privateKey: process.env.PRIVATE_KEY // Your private key for transaction signing
+    });
+    
+    console.log('Swap initiated:', result);
+    return result;
+  } catch (error) {
+    console.error('Error performing swap:', error);
+    throw error;
+  }
+}
+```
 
-Add content directly in your files with MDX syntax and React components. You can use any of our components, or even build your own.
+### Monitoring Your Swap
+
+After initiating a swap, you can track its status:
+
+```javascript
+import { getOrderStatus } from '@tristeroresearch/mach-sdk';
+
+async function checkOrderStatus(orderId) {
+  try {
+    const status = await getOrderStatus(orderId);
+    console.log('Order status:', status);
+    return status;
+  } catch (error) {
+    console.error('Error checking order status:', error);
+    throw error;
+  }
+}
+```
+
+## Next Steps
 
 <CardGroup>
 
-<Card title="Add Content With MDX" icon="file" href="/essentials/markdown">
-  Add content to your docs with MDX syntax.
+<Card title="SDK Installation" icon="download" href="/essentials/sdk-installation">
+  View detailed installation instructions
 </Card>
 
 <Card
-  title="Add Code Blocks"
-  icon="square-code"
-  href="/essentials/code"
+  title="Integrating Mach"
+  icon="plug"
+  href="/mach/getting-started/integrating-mach"
 >
-  Add code directly to your docs with syntax highlighting.
+  Learn about complete integration steps
 </Card>
 
 <Card
-  title="Add Images"
-  icon="image"
-  href="/essentials/images"
+  title="Using Mach SDK"
+  icon="code"
+  href="/mach/user-guide/using-mach-sdk"
 >
-  Add images to your docs to make them more engaging.
+  Explore advanced SDK features
 </Card>
 
 <Card
-  title="Add Custom Components"
-  icon="puzzle-piece"
-  href="/essentials/reusable-snippets"
+  title="Mach Architecture"
+  icon="building"
+  href="/mach/getting-started/mach-architecture"
 >
-  Add templates to your docs to make them more reusable.
+  Understand how Mach works under the hood
 </Card>
 
 </CardGroup>
+
+## Sample Projects
+
+To help you get started quickly, check out these sample implementations:
+
+- [Basic Integration Example](https://github.com/tristeroresearch/mach-examples/basic) - A minimal implementation showing how to perform cross-chain swaps
+- [React Integration Example](https://github.com/tristeroresearch/mach-examples/react) - Example of integrating Mach SDK in a React application
+- [Next.js Integration](https://github.com/tristeroresearch/mach-examples/nextjs) - Implementation with Next.js framework
+
+<Note>
+  For support during integration, join our [Discord community](https://discord.gg/machprotocol) or reach out to our support team.
+</Note>

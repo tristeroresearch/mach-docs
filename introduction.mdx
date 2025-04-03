@@ -1,71 +1,129 @@
 ---
-title: Introduction
-description: "Welcome to the home of your new documentation"
+title: Introduction to Mach Protocol
+description: "Build true cross-chain applications with Mach Protocol"
 ---
 
 <img
   className="block dark:hidden"
   src="/images/hero-light.png"
-  alt="Hero Light"
+  alt="Mach Protocol"
 />
 <img
   className="hidden dark:block"
   src="/images/hero-dark.png"
-  alt="Hero Dark"
+  alt="Mach Protocol"
 />
 
-## Setting up
+## Welcome to Mach Protocol
 
-The first step to world-class documentation is setting up your editing environments.
+Mach Protocol enables developers to build **true cross-chain applications** with seamless user experiences. By eliminating the complexity of traditional cross-chain solutions, Mach allows you to focus on creating innovative applications while we handle the cross-chain infrastructure.
+
+## The Cross-Chain Problem
+
+Traditional cross-chain solutions often involve:
+- Multiple transactions across different chains
+- Complex user experiences with long wait times
+- High costs due to multiple transaction fees
+- Security vulnerabilities from relying on centralized bridges
+- Complex integration for developers
+
+**Mach solves these challenges** with direct cross-chain routes, optimistic intent architecture, and a user-friendly SDK that simplifies integration.
+
+## Developer Benefits
 
 <CardGroup cols={2}>
   <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
+    title="Simple Integration"
+    icon="code"
+    href="/essentials/sdk-installation"
   >
-    Get your docs set up locally for easy development
+    Get started quickly with our comprehensive SDK
   </Card>
   <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
+    title="Enhanced User Experience"
+    icon="user"
+    href="/mach/user-guide/using-mach-sdk"
   >
-    Preview your changes before you push to make sure they're perfect
+    Offer your users seamless cross-chain transactions
+  </Card>
+  <Card
+    title="Reduced Complexity"
+    icon="gear"
+    href="/mach/getting-started/mach-architecture"
+  >
+    Let Mach handle the cross-chain infrastructure
+  </Card>
+  <Card
+    title="Technical Advantages"
+    icon="bolt"
+    href="/mach/getting-started/integrating-mach"
+  >
+    Benefit from direct routes and optimistic intent architecture
   </Card>
 </CardGroup>
 
-## Make it yours
+## Mach SDK
 
-Update your docs to your brand and add valuable content for the best user conversion.
+The Mach SDK provides simple wrappers around the Mach API, allowing you to integrate cross-chain functionality into your applications with minimal effort. It supports both browser and Node.js environments.
+
+```bash
+npm install @tristeroresearch/mach-sdk@latest
+```
+
+### Current Capabilities
+
+- ✅ EVM ERC20 swaps for common tokens
+- 🔄 EVM WETH swaps (coming soon)
+- 🔄 Websocket listening for order events (coming soon)
+- 🔄 Full support for generic ERC20 swaps (coming soon)
+- 🔄 Solana swaps (coming soon)
+- 🔄 Tron swaps (coming soon)
+
+### Basic Usage
+
+```javascript
+import { swapTokens } from '@tristeroresearch/mach-sdk';
+
+// Example: Swap USDC from Ethereum to Arbitrum
+const result = await swapTokens({
+  fromChain: 'ethereum',
+  toChain: 'arbitrum',
+  fromToken: 'USDC',
+  toToken: 'USDC',
+  amount: '10',
+  privateKey: YOUR_PRIVATE_KEY
+});
+```
+
+## Get Started
 
 <CardGroup cols={2}>
   <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
+    title="SDK Installation"
+    icon="download"
+    href="/essentials/sdk-installation"
   >
-    Customize your docs to your company's colors and brands
+    Set up the Mach SDK in your project
   </Card>
   <Card
-    title="Reference APIs"
-    icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
+    title="Integrating Mach"
+    icon="plug"
+    href="/mach/getting-started/integrating-mach"
   >
-    Automatically generate endpoints from an OpenAPI spec
+    Learn how to integrate Mach into your application
   </Card>
   <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/content/components/accordions"
+    title="Architecture Overview"
+    icon="building"
+    href="/mach/getting-started/mach-architecture"
   >
-    Build interactive features and designs to guide your users
+    Understand how Mach works under the hood
   </Card>
   <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/customers"
+    title="API Reference"
+    icon="book"
+    href="/api-reference/sdk/library"
   >
-    Check out our showcase of our favorite documentation
+    Explore the complete SDK documentation
   </Card>
 </CardGroup>

@@ -1,107 +1,188 @@
 ---
-title: 'Development'
-description: 'Preview changes locally to update your docs'
+title: 'Development Guide'
+description: 'Best practices for developing with Mach Protocol'
 ---
 
 <Info>
-  **Prerequisite**: Please install Node.js (version 19 or higher) before proceeding. <br />
-  Please upgrade to ```docs.json``` before proceeding and delete the legacy ```mint.json``` file.
+  **Prerequisite**: This guide assumes you've already installed the Mach SDK. If not, please see the [SDK Installation](/essentials/sdk-installation) page first.
 </Info>
 
-Follow these steps to install and run Mintlify on your operating system:
+## Development Environment Setup
 
-**Step 1**: Install Mintlify:
+To create an optimal development environment for working with Mach Protocol, follow these guidelines:
+
+### Local Development Tools
+
+Set up your environment with these recommended tools:
+
+- **Node.js**: Version 20 or higher
+- **Package Manager**: npm, yarn, or pnpm
+- **IDE**: VS Code with TypeScript and ESLint extensions
+- **Environment Variables**: Use `.env` files for managing private keys and other secrets
+
+### Environment Variables
+
+For secure development, store your private keys and configuration in environment variables:
+
+```bash
+# .env file example
+PRIVATE_KEY=your_private_key_here
+MACH_ENVIRONMENT=testnet  # or mainnet
+```
+
+Then load them in your application:
+
+```javascript
+import dotenv from 'dotenv';
+import { swapTokens } from '@tristeroresearch/mach-sdk';
+
+dotenv.config();
+
+async function executeSwap() {
+  return await swapTokens({
+    // ... swap parameters
+    privateKey: process.env.PRIVATE_KEY
+  });
+}
+```
+
+## Testing on Testnet
+
+Before deploying to production, always test your integration on a testnet:
 
 <CodeGroup>
 
-  ```bash npm
-  npm i -g mintlify
-  ```
+```javascript testnet-example
+import { swapTokens } from '@tristeroresearch/mach-sdk';
 
-```bash yarn
-yarn global add mintlify
+// Perform a testnet swap
+const result = await swapTokens({
+  fromChain: 'goerli',      // Ethereum testnet
+  toChain: 'arbitrum-goerli', // Arbitrum testnet
+  fromToken: 'USDC',
+  toToken: 'USDC',
+  amount: '1',
+  privateKey: process.env.PRIVATE_KEY,
+  testnet: true  // Important flag for testnet operations
+});
 ```
 
 </CodeGroup>
 
-**Step 2**: Navigate to the docs directory (where the `docs.json` file is located) and execute the following command:
+### Getting Testnet Tokens
 
-```bash
-mintlify dev
-```
+You can obtain testnet tokens for testing through testnet faucets available on the respective chain's websites.
 
-A local preview of your documentation will be available at `http://localhost:3000`.
+## Advanced Development Scenarios
 
-### Custom Ports
+### Handling Multiple Orders
 
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. To run Mintlify on port 3333, for instance, use this command:
+When handling multiple orders in your application, implement proper tracking:
 
-```bash
-mintlify dev --port 3333
-```
+```javascript
+import { swapTokens, getOrderStatus } from '@tristeroresearch/mach-sdk';
 
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
+// Store orders in memory or database
+const orderTracking = new Map();
 
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
-
-## Mintlify Versions
-
-Please note that each CLI release is associated with a specific version of Mintlify. If your local website doesn't align with the production version, please update the CLI:
-
-<CodeGroup>
-
-```bash npm
-npm i -g mintlify@latest
-```
-
-```bash yarn
-yarn global upgrade mintlify
-```
-
-</CodeGroup>
-
-## Validating Links
-
-The CLI can assist with validating reference links made in your documentation. To identify any broken links, use the following command:
-
-```bash
-mintlify broken-links
-```
-
-## Deployment
-
-<Tip>
-  Unlimited editors available under the [Pro
-  Plan](https://mintlify.com/pricing) and above.
-</Tip>
-
-If the deployment is successful, you should see the following:
-
-<Frame>
-  <img src="/images/checks-passed.png" style={{ borderRadius: '0.5rem' }} />
-</Frame>
-
-## Code Formatting
-
-We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title='Error: Could not load the "sharp" module using the darwin-arm64 runtime'>
-
-    This may be due to an outdated version of node. Try the following:
-    1. Remove the currently-installed version of mintlify: `npm remove -g mintlify`
-    2. Upgrade to Node v19 or higher.
-    3. Reinstall mintlify: `npm install -g mintlify`
-  </Accordion>
-
-  <Accordion title="Issue: Encountering an unknown error">
+async function createAndTrackOrder(params) {
+  const result = await swapTokens(params);
+  orderTracking.set(result.orderId, {
+    status: 'pending',
+    details: result,
+    created: new Date()
+  });
   
-    Solution: Go to the root of your device and delete the \~/.mintlify folder. Afterwards, run `mintlify dev` again.
-  </Accordion>
-</AccordionGroup>
+  // Set up monitoring
+  monitorOrderStatus(result.orderId);
+  
+  return result;
+}
 
-Curious about what changed in the CLI version? [Check out the CLI changelog.](https://www.npmjs.com/package/mintlify?activeTab=versions)
+async function monitorOrderStatus(orderId) {
+  // Check every 10 seconds
+  const interval = setInterval(async () => {
+    try {
+      const status = await getOrderStatus(orderId);
+      
+      // Update tracking
+      const orderInfo = orderTracking.get(orderId);
+      orderTracking.set(orderId, {
+        ...orderInfo,
+        status: status.status,
+        lastUpdated: new Date()
+      });
+      
+      // If in final state, stop monitoring
+      if (['completed', 'failed', 'cancelled'].includes(status.status)) {
+        clearInterval(interval);
+      }
+    } catch (error) {
+      console.error(`Error monitoring order ${orderId}:`, error);
+    }
+  }, 10000);
+}
+```
+
+### Error Handling Best Practices
+
+Implement robust error handling in your applications:
+
+```javascript
+import { swapTokens } from '@tristeroresearch/mach-sdk';
+
+async function safeSwap(params) {
+  try {
+    const result = await swapTokens(params);
+    return {
+      success: true,
+      data: result
+    };
+  } catch (error) {
+    // Handle specific error types
+    if (error.message.includes('insufficient funds')) {
+      return {
+        success: false,
+        error: 'INSUFFICIENT_FUNDS',
+        message: 'Your wallet does not have enough funds for this transaction'
+      };
+    } else if (error.message.includes('rejected')) {
+      return {
+        success: false,
+        error: 'USER_REJECTED',
+        message: 'Transaction was rejected by the user'
+      };
+    }
+    
+    // Generic error handling
+    return {
+      success: false,
+      error: 'SWAP_FAILED',
+      message: 'Failed to execute swap',
+      details: error.message
+    };
+  }
+}
+```
+
+## Performance Optimization
+
+For applications processing high volumes of swaps:
+
+1. **Connection Pooling**: Reuse wallet connections when possible
+2. **Batch Processing**: Group multiple operations where feasible
+3. **Caching**: Cache chain and token information to reduce API calls
+4. **Rate Limiting**: Implement rate limiting for API calls to avoid throttling
+
+## Debugging Tips
+
+When debugging issues with the Mach SDK:
+
+1. **Enable Console Logging**: Add detailed logging to track the flow of your application
+2. **Check Transaction Status**: Verify transaction status on the source chain's block explorer
+3. **Validate Input Parameters**: Ensure all parameters are correctly formatted before submitting
+4. **Review Error Messages**: The SDK provides specific error messages to help diagnose issues
+
+<Note>
+  For additional help with development issues, join our Discord community where our team can provide assistance.
+</Note>
