@@ -41,7 +41,8 @@
               "mach/protocol-concepts/intents",
               "mach/protocol-concepts/optimistic-settlement",
               "mach/protocol-concepts/orderbook-and-limit-orders",
-              "mach/protocol-concepts/contract-addresses"
+              "mach/protocol-concepts/contract-addresses",
+              "mach/protocol-concepts/security"
             ]
           }
         ]
