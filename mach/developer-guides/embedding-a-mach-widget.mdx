@@ -1,0 +1,83 @@
+# Mach Exchange Embed Integration
+
+The application supports being embedded into third-party websites via an iframe. Use the `/embed` path to access the embed-specific version of the application.
+
+## URL Parameters for Customization
+
+The embed version accepts the following URL parameters for customization:
+
+### Theme Customization
+
+- `themePrimary`: Primary color for buttons (hex format, e.g., `%23349FFD` for #349FFD)
+- `themeBackground`: Background color (hex format)
+- `themeModalBackground`: (EXPERIMENTAL) Background color of the Swap In Progress flow, which is more stably impacted using the `useIntuitiveColorDefaults` param below
+- `showBranding`: Whether to show "Powered by Mach.Exchange" (default: `true`)
+- `hideAIInput`: Whether to hide the AI input box (default: `false`)
+- `useIntuitiveColorDefaults`: Whether to use automatic color complementary pairing when only one color is provided (default: `false`). When both primary and background colors are provided, this parameter has no effect.
+
+### Logo Customization
+
+- `logoUrl`: URL of the partner logo to display (URL-encoded)
+- `logoHeight`: Height of the logo in pixels (numeric value, default: 40)
+- `logoWidth`: Width of the logo in pixels (numeric value, optional)
+- `logoPosition`: Alignment of the logo, options: `left`, `center`, or `right` (default: `center`)
+
+#### Pending Transaction Indicator
+
+- `showPendingTX`: Whether to show the pending transaction indicator (default: `false`). For best results, pair with `showHamburgerMenu`
+- `pendingTXPosition`: Position of the pending transaction indicator, options: `left`, `center`, or `right` (default: opposite to logo)
+
+#### Hamburger Menu
+- `showHamburgerMenu`: Whether to show the Mach hamburger menu (with its links adjusted for Embed mode, default: `false`)
+
+### Token Configuration
+
+- `chains`: Comma-separated list of chain IDs to restrict available networks
+- `from`: Source token in format `chainId:tokenAddress`
+- `to`: Destination token in format `chainId:tokenAddress`
+- `destinationWallet`: Custom recipient wallet address for receiving tokens (enables "Send to different wallet" mode)
+
+### Additional Notes
+
+- All color values should be URL-encoded (e.g., `%23` instead of `#`)
+- The `destinationWallet` parameter configures a default destination wallet, routing users' order destination to the specified address unless they change it
+- When `hideAIInput=true`, the AI-powered input interface will be hidden for a more streamlined experience
+- Logo URLs must be properly URL-encoded
+- Chain IDs should correspond to supported networks
+- Token addresses should be valid contract addresses for the specified chains
+
+
+## Example URLs
+![Widget - Primary](/images/widget-chains-hamburger.png)
+
+### Embed with primary color, theme backgrounds hidden AI input, and destination wallet
+```
+https://dev.mach.exchange/embed?themePrimary=%23AB0044&themeBackground=%23222222&A&hideAIInput=true&destinationWallet=0x7c5D073567f51a42B10a5B99519a51cea1959b79
+```
+
+![Widget with Intuitive Colors](/images/widget-intuit.png)
+### Embed with backgrounds, destination wallet, and using intuitive color defaults
+```
+https://dev.mach.exchange/embed?themeBackground=%23222222&themeModalBackground=%23001A1A&useIntuitiveColorDefaults=true&destinationWallet=0x7c5D073567f51a42B10a5B99519a51cea1959b79
+```
+
+![Widget with Hamburger](/images/widget-chains-hamburger.png)
+### Embed with hidden AI input, visible hamburger/slide out menu, chains set to ETH/OP, and pending transaction indicator
+https://dev.mach.exchange/embed?themeBackground=%23FF1A1A&A&hideAIInput=true&chains=1,10&showHamburgerMenu=true&showPendingTX=true
+
+## Integration Example
+
+To embed Mach Exchange into your website, include an iframe in your website's HTML, for example:
+
+```html
+<iframe 
+  src="https://dev.mach.exchange/embed?hideAIInput=true&destinationWallet=YOUR_WALLET_ADDRESS" 
+  width="100%" 
+  height="600" 
+  frameborder="0">
+</iframe>
+```
+
+## Conclusion
+Mach's embed mode makes it easy to style the Exchange component to match your brand and funnel users through your preferred routes. For any questions regarding specific functionality or help matching your brand, contact us directly on Telegram or Discord.
+
