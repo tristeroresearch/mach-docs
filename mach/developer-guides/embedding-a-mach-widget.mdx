@@ -1,6 +1,10 @@
-# Mach Exchange Embed Integration
+---
+title: "Mach Exchange Embed Integration"
+---
 
-The application supports being embedded into third-party websites via an iframe. Use the `/embed` path to access the embed-specific version of the application.
+# Mach Embed Integration
+
+Mach supports embedding into third-party websites via an iframe. Use the `/embed` path to access the embed-specific version of the application.
 
 ## URL Parameters for Customization
 
@@ -28,6 +32,7 @@ The embed version accepts the following URL parameters for customization:
 - `pendingTXPosition`: Position of the pending transaction indicator, options: `left`, `center`, or `right` (default: opposite to logo)
 
 #### Hamburger Menu
+
 - `showHamburgerMenu`: Whether to show the Mach hamburger menu (with its links adjusted for Embed mode, default: `false`)
 
 ### Token Configuration
@@ -46,24 +51,39 @@ The embed version accepts the following URL parameters for customization:
 - Chain IDs should correspond to supported networks
 - Token addresses should be valid contract addresses for the specified chains
 
-
 ## Example URLs
-![Widget - Primary](/images/widget-chains-hamburger.png)
+
+<img
+  src="/images/widget-primary.png"
+  alt="Widget Primary Pn"
+  title="Widget Primary Pn"
+  style={{ width:"39%" }}
+/>
 
 ### Embed with primary color, theme backgrounds hidden AI input, and destination wallet
-```
-https://dev.mach.exchange/embed?themePrimary=%23AB0044&themeBackground=%23222222&A&hideAIInput=true&destinationWallet=0x7c5D073567f51a42B10a5B99519a51cea1959b79
-```
 
-![Widget with Intuitive Colors](/images/widget-intuit.png)
+To see it live, visit https://dev.mach.exchange/embed?themePrimary=%23AB0044&themeBackground=%23222222&A&hideAIInput=true&destinationWallet=0x7c5D073567f51a42B10a5B99519a51cea1959b79
+
+<img
+  src="/images/widget-intuit.png"
+  alt="Widget with Intuitive Colors"
+  style={{ width:"36%" }}
+/>
+
 ### Embed with backgrounds, destination wallet, and using intuitive color defaults
-```
-https://dev.mach.exchange/embed?themeBackground=%23222222&themeModalBackground=%23001A1A&useIntuitiveColorDefaults=true&destinationWallet=0x7c5D073567f51a42B10a5B99519a51cea1959b79
-```
 
-![Widget with Hamburger](/images/widget-chains-hamburger.png)
+To see it live, visit https://dev.mach.exchange/embed?themeBackground=%23222222&themeModalBackground=%23001A1A&useIntuitiveColorDefaults=true&destinationWallet=0x7c5D073567f51a42B10a5B99519a51cea1959b79
+
+<img
+  src="/images/widget-chains-hamburger.png"
+  alt="Widget Chains Hamburger Pn"
+  title="Widget Chains Hamburger Pn"
+  style={{ width:"49%" }}
+/>
+
 ### Embed with hidden AI input, visible hamburger/slide out menu, chains set to ETH/OP, and pending transaction indicator
-https://dev.mach.exchange/embed?themeBackground=%23FF1A1A&A&hideAIInput=true&chains=1,10&showHamburgerMenu=true&showPendingTX=true
+
+To see it live, visit https://dev.mach.exchange/embed?themeBackground=%23FF1A1A&A&hideAIInput=true&chains=1,10&showHamburgerMenu=true&showPendingTX=true
 
 ## Integration Example
 
@@ -79,5 +99,5 @@ To embed Mach Exchange into your website, include an iframe in your website's HT
 ```
 
 ## Conclusion
-Mach's embed mode makes it easy to style the Exchange component to match your brand and funnel users through your preferred routes. For any questions regarding specific functionality or help matching your brand, contact us directly on Telegram or Discord.
 
+Mach's embed mode makes it easy to style the Exchange component to match your brand and funnel users through your preferred routes. For any questions regarding specific functionality or help matching your brand, contact us directly on Telegram or Discord.
