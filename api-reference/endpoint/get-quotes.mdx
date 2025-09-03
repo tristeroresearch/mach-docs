@@ -1,6 +1,6 @@
 ---
 title: 'Get Quote'
-api: 'POST /v1/quotes'
+api: 'POST /quotes'
 description: 'Returns a price quote for a cross-chain swap'
 ---
 
@@ -8,32 +8,32 @@ This endpoint provides a price quote for a cross-chain swap based on the specifi
 
 ## Request
 
-<ParamField body="wallet_address" type="string">
-  User's wallet address (optional, defaults to zero address)
+<ParamField body="src_chain_id" type="integer" required>
+  Source chain ID (e.g., 42161 for Arbitrum, 43114 for Avalanche)
 </ParamField>
 
-<ParamField body="target_address" type="string" optional>
-  Optional recipient address if different from wallet
+<ParamField body="src_wallet_address" type="string" required>
+  Source wallet address
 </ParamField>
 
-<ParamField body="src_chain" type="string" required>
-  Source chain identifier (e.g., "arbitrum", "optimism")
-</ParamField>
-
-<ParamField body="dst_chain" type="string" required>
-  Destination chain identifier
-</ParamField>
-
-<ParamField body="src_asset_address" type="string" required>
+<ParamField body="src_token_address" type="string" required>
   Source token contract address
 </ParamField>
 
-<ParamField body="dst_asset_address" type="string" required>
-  Destination token contract address
+<ParamField body="src_token_quantity" type="string" required>
+  Amount to swap in the smallest unit of the source token
 </ParamField>
 
-<ParamField body="src_amount" type="integer" required>
-  Amount to swap in the smallest unit of the source token
+<ParamField body="dst_chain_id" type="integer" required>
+  Destination chain ID
+</ParamField>
+
+<ParamField body="dst_wallet_address" type="string" required>
+  Destination wallet address
+</ParamField>
+
+<ParamField body="dst_token_address" type="string" required>
+  Destination token contract address
 </ParamField>
 
 ## Response
@@ -191,15 +191,16 @@ This endpoint provides a price quote for a cross-chain swap based on the specifi
 <RequestExample>
 ```bash
 curl --request POST \
-  --url 'https://mach-prod-536329393577.asia-northeast1.run.app/v1/quotes' \
+  --url 'https://api.mach.exchange/quotes/' \
   --header 'Content-Type: application/json' \
   --data '{
-    "wallet_address": "0xb20094DFede30AbEe3a8d549BbA828b6fd771106",
-    "src_chain": "avalanche",
-    "dst_chain": "arbitrum",
-    "src_asset_address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
-    "dst_asset_address": "0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5",
-    "src_amount": 1000000
+    "src_chain_id": 42161,
+    "src_wallet_address": "0x0000000000000000000000000000000000000000",
+    "src_token_address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    "src_token_quantity": "5763296",
+    "dst_chain_id": 43114,
+    "dst_wallet_address": "0x0000000000000000000000000000000000000000",
+    "dst_token_address": "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7"
   }'
 ```
 </RequestExample>
